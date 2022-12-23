@@ -1,12 +1,31 @@
-import {createStore, applyMiddleware} from 'redux';
-import thunk from 'redux-thunk';
-import { composeWithDevTools } from '@redux-devtools/extension';
-import {rootReducer} from "./rootReducer";
+import createMemeSlice from "./create-meme/createMemeSlice";
 
+export const USER_LOGOUT = '@@logout/USER_LOGOUT'
 
-export const store = createStore(
-  rootReducer,
-  composeWithDevTools(
-    applyMiddleware(thunk),
-  )
-)
+import {combineReducers, configureStore} from '@reduxjs/toolkit'
+import authSlice from "./auth/authSlice";
+import {setupListeners} from "@reduxjs/toolkit/query";
+import {imgFlipApi} from "./queries/imgFlipApi";
+import {dbApi} from "./queries/dbApi";
+
+const combinedReducer = combineReducers({
+  auth: authSlice,
+  createMeme: createMemeSlice,
+  [dbApi.reducerPath]: dbApi.reducer,
+  [imgFlipApi.reducerPath]: imgFlipApi.reducer,
+});
+
+const rootReducer = (state, action) => {
+  if (action.type === USER_LOGOUT) {
+    state = undefined;
+  }
+  return combinedReducer(state, action);
+};
+
+export const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(dbApi.middleware, imgFlipApi.middleware,)
+})
+
+setupListeners(store.dispatch)

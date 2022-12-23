@@ -1,14 +1,39 @@
 import {Image, Modal, Pressable, Text, StyleSheet, View} from "react-native";
-import React from "react";
-import {clearCreatedMeme, publicMeme, setIsOpenModal} from "../store/create-meme/createMemeActions";
+import React, {useMemo} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {COLORS} from "../assets/colors";
+import Preloader from "./ui/Preloader";
+import {clearCreatedMeme, setIsOpenModal} from "../store/create-meme/createMemeSlice";
+import {usePublishMemeMutation} from "../store/queries/dbApi";
 
 
-export default function MyModal({ memeImg }) {
+export default function MyModal({ memeImg, clearFields }) {
   const dispatch = useDispatch()
   const isOpenModal = useSelector(state => state.createMeme.isOpenModal)
   const isPublished = useSelector(state => state.createMeme.isPublished)
+
+  const createdMeme = useSelector(state => state.createMeme.createdMeme)
+
+
+  const creator = useSelector(state => state.auth.user.uid)
+
+  const [publishMeme, {data, isLoading, isError}] = usePublishMemeMutation()
+
+  console.log('POSTED MEME', data)
+
+  const publishPost = async () => {
+    await publishMeme(JSON.stringify({
+      url: createdMeme,
+      creatorId: creator,
+      date: new Date(),
+      likes: 0,
+      comments: ''
+    }))
+
+    //передана через пропс функція очищення текстових полів
+    clearFields(null)
+  }
+
 
   return(
     <>
@@ -25,7 +50,7 @@ export default function MyModal({ memeImg }) {
           {
             !isPublished
               ?
-              <View style={styles.modalView}>
+                <View style={styles.modalView}>
                 <View>
                   <Image
                     style={styles.tinyLogo}
@@ -41,7 +66,7 @@ export default function MyModal({ memeImg }) {
                 {/*</Pressable>*/}
                 <Pressable
                   style={[styles.button, styles.buttonOpen]}
-                  onPress={() => dispatch(publicMeme())}
+                  onPress={publishPost}
                 >
                   <Text style={styles.textStyle}>Опублікувати на сторінці</Text>
                 </Pressable>

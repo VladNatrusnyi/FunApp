@@ -1,11 +1,10 @@
 import {useDispatch, useSelector} from "react-redux";
 import React, {useEffect, useLayoutEffect, useMemo, useState} from "react";
-import apiDB from "../apiDB";
-import Preloader from "../components/ui/Preloader";
+import apiDB from "../../apiDB";
+import Preloader from "../../components/ui/Preloader";
 import {Image, Text, View} from "react-native";
-import {COLORS} from "../assets/colors";
-import MyButton from "../components/ui/MyButton";
-import {addToFavourite} from "../store/meme/memeActions";
+import {COLORS} from "../../assets/colors";
+import MyButton from "../../components/ui/MyButton";
 
 
 export const UserProfileMemeItem = ({navigation, route}) => {
@@ -66,7 +65,7 @@ export const UserProfileMemeItem = ({navigation, route}) => {
             {
               loggedUser !== currentUser.uid
               &&
-              <MyButton clickButton={() => dispatch(addToFavourite(memeData.id))} text="Додати до улюблених" bgColor={COLORS.orange}/>
+              <MyButton clickButton={() => {}} text="Додати до улюблених" bgColor={COLORS.orange}/>
             }
           </>
       }

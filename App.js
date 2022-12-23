@@ -1,6 +1,7 @@
 import {Provider} from "react-redux";
-import {store} from "./store";
+
 import RootNavigator from "./navigation/RootNavigator";
+import {store} from "./store";
 
 
 export default function App() {

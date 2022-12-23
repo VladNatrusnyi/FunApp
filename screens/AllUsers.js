@@ -1,19 +1,18 @@
 import {FlatList, Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {COLORS} from "../assets/colors";
 import React, {useEffect, useLayoutEffect} from "react";
-import {MemeImg} from "../components/MemeImg";
 import {useDispatch, useSelector} from "react-redux";
-import {getUsers} from "../store/users/usersActions";
 import Preloader from "../components/ui/Preloader";
 import {useNavigation} from "@react-navigation/native";
+import {useGetMemesForCurrentUserQuery, useGetUsersQuery} from "../store/queries/dbApi";
 
 export function AllUsers () {
   const dispatch = useDispatch()
   const navigation = useNavigation();
 
-  useEffect(() => {
-    dispatch(getUsers())
-  }, [])
+  // useEffect(() => {
+  //   dispatch(getUsers())
+  // }, [])
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -21,9 +20,14 @@ export function AllUsers () {
     });
   }, [navigation]);
 
-  const users = useSelector(state => state.users.users)
-  const usersLoaded = useSelector(state => state.users.usersLoaded)
+  const currentUserId = useSelector(state => state.auth.user.uid)
+  // const usersLoaded = useSelector(state => state.users.usersLoaded)
 
+  const { users, isLoading, isError  } = useGetUsersQuery(undefined, {
+    selectFromResult: ({data}) => ({
+      users: data?.users.filter(user => user.uid !== currentUserId && user.uid)
+    })
+  })
 
   return (
     <View>
@@ -31,7 +35,7 @@ export function AllUsers () {
         <Text style={{fontSize: 24, fontWeight: "bold", color: COLORS.orange}} >Користувачі</Text>
       </View>
       {
-        usersLoaded
+        isLoading
           ? <Preloader />
           : <View style={{}}>
           <FlatList
@@ -44,11 +48,20 @@ export function AllUsers () {
                 style={styles.userItem}
                 onPress={() => navigation.navigate("User profile", {userData: item})}
               >
-                <Image
-                  style={{height: 40, width: 40, marginHorizontal: 20}}
-                  source={ require('../assets/user.png')}
-                  resizeMode='contain'
-                />
+                {
+                  item.photoURL ?
+                    <Image
+                      style={{height: 40, width: 40, marginHorizontal: 20, borderRadius: 100}}
+                      source={{uri: item.photoURL}}
+                      resizeMode='contain'
+                    />
+                    :
+                    <Image
+                      style={{height: 40, width: 40, marginHorizontal: 20}}
+                      source={require('../assets/user.png')}
+                      resizeMode='contain'
+                    />
+                }
                 <Text style={styles.userItemText}>{ item.displayName }</Text>
               </TouchableOpacity>
             )}

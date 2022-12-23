@@ -4,7 +4,6 @@ import {useMemo, useState} from "react";
 import {COLORS} from "../assets/colors";
 import {MyMemeList} from "./MyMemes/MyMemesList";
 import {useDispatch, useSelector} from "react-redux";
-import {getMyMemes} from "../store/meme/memeActions";
 
 
 // const myFavouriteMemes = useSelector(state => state.memes.favouriteMemes)

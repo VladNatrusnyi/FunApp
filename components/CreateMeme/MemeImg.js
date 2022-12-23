@@ -1,12 +1,12 @@
 import {View, StyleSheet, TouchableOpacity, Image, Text} from 'react-native'
-import {setIsOpenMemeListModal, setMemeImg} from "../store/create-meme/createMemeActions";
 import {useDispatch} from "react-redux";
+import {setIsOpenMemeListModal, setMemeImg} from "../../store/create-meme/createMemeSlice";
 
 export const MemeImg = ({ memeImageItem }) => {
   const dispatch = useDispatch()
 
   const setMemeImage = () => {
-    dispatch(setMemeImg({memeUrl: memeImageItem.url, memeId: memeImageItem.id}))
+    dispatch(setMemeImg({memeUrl: memeImageItem.url, memeId: memeImageItem.id, box_count: memeImageItem.box_count}))
     dispatch(setIsOpenMemeListModal(false))
   }
 

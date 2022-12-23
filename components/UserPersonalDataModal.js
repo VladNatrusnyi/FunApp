@@ -7,55 +7,86 @@ import {
   View,
   ActivityIndicator,
   TextInput,
-  SafeAreaView
+  SafeAreaView, TouchableOpacity
 } from "react-native";
 import React, {useEffect, useMemo, useState} from "react";
-import {setIsOpenMemeListModal, setIsOpenModal} from "../store/create-meme/createMemeActions";
 import {useDispatch, useSelector} from "react-redux";
-import {MemeImgList} from "./MemeImgList";
-import {selectMemesImg} from "../store/memeImg/memeImgSelectors";
+import {MemeImgList} from "./CreateMeme/MemeImgList";
 import {COLORS} from "../assets/colors";
-import {loadMemesImg} from "../store/memeImg/memeImgActions";
 import MyButton from "./ui/MyButton";
 import LightButton from "./ui/LightButton";
-import {getCurrentUserData, setIsOpenUserPersonalDataModal} from "../store/auth/authActions";
+import {changeCurrentUserData, getCurrentUserData, setIsOpenUserPersonalDataModal} from "../store/auth/authSlice";
+import {setIsOpenMemeListModal} from "../store/create-meme/createMemeSlice";
+import {AntDesign, MaterialIcons} from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import {USER_LOGOUT} from "../store";
+import {getImgUrl} from "../helpers/getImgUrl";
+import Preloader from "./ui/Preloader";
+import {deleteObject, getStorage, ref} from "firebase/storage";
 
 
-export default function UserPersonalListModal () {
+export default function UserPersonalListModal ({text = '', img = null}) {
 
-  const [name, setName] = useState('')
+  const [name, setName] = useState(text)
+  const [photo, setPhoto] = useState(null)
+  const [existPhoto, setExistPhoto] = useState(img)
 
   const dispatch = useDispatch()
   const isOpenUserPersonalDataModal = useSelector(state => state.auth.isOpenUserPersonalDataModal)
   const userData = useSelector(state => state.auth.user)
+  const isLoadingChanges = useSelector(state => state.auth.isLoadingChanges)
 
-  // const isLoadedMemeImg = useSelector(state => state.memeImg.isLoadedMemeImg)
-  // const memesImages = useSelector(selectMemesImg)
+  const uploadPhoto = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    console.log('resultIMG', result);
+
+    if (!result.canceled) {
+      setPhoto(result)
+      setExistPhoto('')
+    }
+  };
+
+  const saveData =  async () => {
+    let imgUrl = ''
+    if (photo) {
+      imgUrl = await getImgUrl(photo, userData.uid)
+    } else {
+      imgUrl = ''
+    }
+
+    console.log('IMG URL', imgUrl)
+    if (!text && name) {
+      dispatch(getCurrentUserData({name, imgUrl}))
+    }
+
+    if (name) {
+      dispatch(changeCurrentUserData({name, imgUrl: imgUrl ? imgUrl : existPhoto }))
+    }
+  }
 
 
-  // useMemo(() => setName(userData.personalData.name) || setName(''), [userData.personalData.name])
-  // const uName = useMemo(() => userData.personalData.name || '', [userData.personalData.name])
+  const cancelPhoto = () => {
+    setPhoto(null)
 
+    const storage = getStorage();
 
-  // const chooseUserAvatar = useMemo(() => {
-  //   const status = memeImg
-  //     ? {icon: 'create-outline', text: 'Завантажити інше фото'}
-  //     : {icon: 'add-circle-outline', text: 'Завантажити фото'}
-  //
-  //   return (
-  //     <LightButton
-  //       clickButton={() => dispatch(setIsOpenMemeListModal(true))}
-  //       text={status.text}
-  //       iconName={status.icon}
-  //     />
-  //   )
-  // }, [memeImg])
+    const desertRef = ref(storage, userData.uid);
 
-  // const setNewUserName = (text) => {
-  //   if (text) {
-  //     dispatch()
-  //   }
-  // }
+    deleteObject(desertRef).then(() => {
+      console.log('File deleted successfully')
+      setExistPhoto('')
+    }).catch((error) => {
+      console.log('File deleted error', error)
+    });
+  }
+
 
   return(
     <>
@@ -63,42 +94,86 @@ export default function UserPersonalListModal () {
         animationType="slide"
         transparent={false}
         visible={isOpenUserPersonalDataModal}
-        // onRequestClose={() => dispatch(setIsOpenUserPersonalDataModal(false))}
+        onRequestClose={() => {
+          dispatch(setIsOpenUserPersonalDataModal(false))
+          if (!text) {
+            dispatch({type: USER_LOGOUT})
+          }
+          }
+        }
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <View style={{width: 250}}>
+            {
+              isLoadingChanges ? <ActivityIndicator size="small" color={COLORS.orange} />
+                :
+                <View style={{width: 250}}>
 
-              <SafeAreaView style={styles.form}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Введіть ваше ім'я"
-                  autoCapitalize="none"
-                  keyboardType="default"
-                  value={name}
-                  onChangeText={(text) => setName(text)}
-                />
+                  <SafeAreaView style={styles.form}>
+                    {existPhoto || photo && photo.assets[0] ?
+                      <View style={{ justifyContent: "center", alignItems: "center", marginBottom: 20}}>
+                        <View style={{ marginBottom: 20, position: 'relative'}}>
+
+                          <TouchableOpacity style={{position: 'absolute', right: 0,top: 0, zIndex: 20}} onPress={cancelPhoto}>
+                            <MaterialIcons name="cancel" size={20} color="lightgray" />
+                          </TouchableOpacity>
+
+                          {
+                            existPhoto ?
+                              <Image
+                                style={styles.tinyLogo}
+                                source={{
+                                  uri: existPhoto,
+                                }}
+                                resizeMode='cover'
+                              />
+                              :
+                              <Image
+                                style={styles.tinyLogo}
+                                source={{
+                                  uri: photo.assets[0].uri,
+                                }}
+                                resizeMode='cover'
+                              />
+                          }
+                        </View>
+
+                        <LightButton
+                          style={{marginBottom: 15}}
+                          clickButton={uploadPhoto}
+                          text={'Змінити фото'}
+                          iconName={'create-outline'}
+                        />
+                      </View>
+                      :
+                      <TouchableOpacity onPress={uploadPhoto} style={{ alignItems: "center"}}>
+                        <View style={styles.btnWrap}>
+                          <MaterialIcons
+                            style={{marginHorizontal: 'auto'}}
+                            name="add-photo-alternate"
+                            size={32}
+                            color={COLORS.orange}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    }
 
 
-                {/*{ chooseUserAvatar }*/}
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Введіть ваше ім'я"
+                      autoCapitalize="none"
+                      keyboardType="default"
+                      value={name}
+                      onChangeText={(text) => setName(text)}
+                    />
 
-                {/*{ !!memeImg*/}
-                {/*&&*/}
-                {/*<View style={styles.checkedImgWrap}>*/}
-                {/*  <Image*/}
-                {/*    style={styles.tinyLogo}*/}
-                {/*    source={{*/}
-                {/*      uri: memeImg.memeUrl,*/}
-                {/*    }}*/}
-                {/*    resizeMode='contain'*/}
-                {/*  />*/}
-                {/*</View>*/}
-                {/*}*/}
 
-                <MyButton clickButton={() => dispatch(getCurrentUserData(name))} text="Зберегти" bgColor={COLORS.orange}/>
-              </SafeAreaView>
+                    <MyButton clickButton={saveData} text="Зберегти" bgColor={COLORS.orange}/>
+                  </SafeAreaView>
 
-            </View>
+                </View>
+            }
           </View>
         </View>
       </Modal>
@@ -117,7 +192,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -149,12 +224,13 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   tinyLogo: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
+    borderRadius: 100
   },
   form: {
     justifyContent: 'flex-start',
-    marginHorizontal: 30,
+    marginHorizontal: 20,
     marginTop: 20
   },
   input: {
@@ -165,4 +241,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
   },
+
+  btnWrap: {
+    width: 100,
+    height: 100,
+    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 30,
+    borderColor: COLORS.orange,
+    borderWidth: 2,
+    borderRadius: 10,
+    borderStyle: "dashed",
+    marginBottom: 20
+  }
 });

@@ -1,23 +1,25 @@
-import { StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { StyleSheet, Text, View, Button, TextInput,
+  Image, SafeAreaView, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import {useState} from "react";
-import {setAuthIsLoading} from "../store/auth/authActions";
 import {useDispatch} from "react-redux";
-const backImage = require("../assets/backImage.png");
+import {setAuthIsLoading} from "../../store/auth/authSlice";
+const backImage = require("../../assets/backImage.png");
 
-export default function Login({ navigation }) {
+export default function Signup({ navigation }) {
 
   const dispatch = useDispatch()
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const onHandleLogin = () => {
-    if (email !== "" && password !== "") {
+  const onHandleSignup = () => {
+    if (email !== '' && password !== '') {
       dispatch(setAuthIsLoading(true))
-      signInWithEmailAndPassword(auth, email, password)
+      createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
+          console.log('Signup success')
           dispatch(setAuthIsLoading(false))
         })
         .catch((err) => {
@@ -32,7 +34,7 @@ export default function Login({ navigation }) {
       <Image source={backImage} style={styles.backImage} />
       <View style={styles.whiteSheet} />
       <SafeAreaView style={styles.form}>
-        <Text style={styles.title}>Log In</Text>
+        <Text style={styles.title}>Sign Up</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter email"
@@ -53,13 +55,13 @@ export default function Login({ navigation }) {
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
-        <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
-          <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}> Log In</Text>
+        <TouchableOpacity style={styles.button} onPress={onHandleSignup}>
+          <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}> Sign Up</Text>
         </TouchableOpacity>
         <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
           <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-            <Text style={{color: '#f57c00', fontWeight: '600', fontSize: 14}}> Sign Up</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={{color: '#f57c00', fontWeight: '600', fontSize: 14}}> Log In</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -67,6 +69,7 @@ export default function Login({ navigation }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

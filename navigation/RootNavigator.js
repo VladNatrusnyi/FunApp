@@ -1,13 +1,14 @@
-import {useContext, useEffect, useState} from "react";
+import {useEffect} from "react";
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "../config/firebase";
 import {ActivityIndicator, Text, View} from "react-native";
 import {NavigationContainer} from "@react-navigation/native";
-import MyProfileStack from "./MyProfileStack";
 import AuthStack from "./AuthStack";
 import {useDispatch, useSelector} from "react-redux";
-import {setAuthIsLoading, setAuthUser} from "../store/auth/authActions";
+
 import MainStack from "./MainStack";
+import {setAuthIsLoading, setAuthUser} from "../store/auth/authSlice";
+import {COLORS} from "../assets/colors";
 
 export default function RootNavigator() {
   const dispatch = useDispatch();
@@ -15,12 +16,9 @@ export default function RootNavigator() {
 
 
   useEffect(() => {
-
+    dispatch(setAuthIsLoading(true))
     const unsubscribeAuth = onAuthStateChanged(auth,(authenticatedUser) => {
-      dispatch(setAuthUser())
-
-      // authenticatedUser ? dispatch(setAuthUser(authenticatedUser)) : dispatch(setAuthUser(null));
-      //
+        dispatch(setAuthUser())
       }
     );
 
@@ -31,7 +29,8 @@ export default function RootNavigator() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size='large' />
+        <Text style={{color: COLORS.orange, fontSize: 34, fontWeight: "bold"}}>Fun App</Text>
+        <ActivityIndicator size='large' color={COLORS.orange}/>
       </View>
     );
   }

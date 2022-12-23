@@ -1,31 +1,25 @@
 import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import {AntDesign, FontAwesome} from '@expo/vector-icons';
-import colors from '../colors';
-import { Entypo } from '@expo/vector-icons';
+import {AntDesign, Entypo, FontAwesome} from '@expo/vector-icons';
+import colors from '../../colors';
 import React, {useEffect, useLayoutEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {COLORS} from "../assets/colors";
-import Tabs from "../components/Tabs";
+import {COLORS} from "../../assets/colors";
+import Tabs from "../../components/Tabs";
 import {signOut} from "firebase/auth";
-import {auth} from "../config/firebase";
-import {USER_LOGOUT} from "../store/rootReducer";
+import {auth} from "../../config/firebase";
+import {USER_LOGOUT} from "../../store";
+import {CustomMenu} from "../../components/CustomMenu";
+import UserPersonalDataModal from "../../components/UserPersonalDataModal";
 const catImageUrl = "https://i.guim.co.uk/img/media/26392d05302e02f7bf4eb143bb84c8097d09144b/446_167_3683_2210/master/3683.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=49ed3252c0b2ffb49cf8b508892e452d";
 
 const MyProfile = () => {
   const dispatch = useDispatch()
   const userName = useSelector(state => state.auth.user.displayName)
+  const userAvatar = useSelector(state => state.auth.user.photoURL)
 
   const navigation = useNavigation();
 
-  const onSignOut = () => {
-    signOut(auth).then(() => {
-      console.log('Ми вийшли')
-      dispatch({type: USER_LOGOUT})
-    }).catch((error) => {
-      console.log('Error logging out: ', error)
-    });
-  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -35,10 +29,19 @@ const MyProfile = () => {
           style={{
             marginRight: 10
           }}
-          onPress={onSignOut}
         >
-          <AntDesign name="logout" size={24} color={colors.gray} style={{marginRight: 10}}/>
+          <CustomMenu />
         </TouchableOpacity>
+
+        // <TouchableOpacity
+        //   style={{
+        //     marginRight: 10
+        //   }}
+        //   onPress={onSignOut}
+        // >
+        //
+        //   <AntDesign name="logout" size={24} color={colors.gray} style={{marginRight: 10}}/>
+        // </TouchableOpacity>
       )
     });
   }, [navigation]);
@@ -48,11 +51,20 @@ const MyProfile = () => {
       <View style={{flex: 1}}>
 
         <View style={styles.head}>
-          <Image
-            style={{width: 100, height: 100}}
-            source={require('../assets/user.png')}
-            resizeMode='contain'
-          />
+          {
+            userAvatar ?
+              <Image
+                style={{width: 100, height: 100, borderRadius: 100}}
+                source={{uri: userAvatar}}
+                resizeMode='contain'
+              />
+              :
+              <Image
+                style={{width: 100, height: 100}}
+                source={require('../../assets/user.png')}
+                resizeMode='contain'
+              />
+          }
           <Text style={styles.userName}>{userName}</Text>
         </View>
         <View style={styles.memes}>
@@ -70,7 +82,6 @@ const MyProfile = () => {
           </TouchableOpacity>
         </View>
       </View>
-
     </>
 
   );

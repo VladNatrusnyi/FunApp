@@ -1,5 +1,5 @@
-import Login from "../screens/Login";
-import Signup from "../screens/Signup";
+import Login from "../screens/auth/Login";
+import Signup from "../screens/auth/Signup";
 import MyProfileStack from "./MyProfileStack";
 import {AllPosts} from "../screens/AllPosts";
 import {AllUsers} from "../screens/AllUsers";
@@ -8,7 +8,7 @@ import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../assets/colors";
 import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {setIsOpenUserPersonalDataModal} from "../store/auth/authActions";
+import {setIsOpenUserPersonalDataModal} from "../store/auth/authSlice";
 import UserPersonalDataModal from "../components/UserPersonalDataModal";
 import UsersStack from "./UsersStack";
 
@@ -35,10 +35,10 @@ export default function MainStack() {
               return (
                 <Ionicons name="ios-search" size={25} color={focused ? COLORS.orange : 'gray' } />
               );
-            // } else if (route.name === 'All Posts') {
-            //   return (
-            //     <Ionicons name="home" size={25} color={focused ? COLORS.orange : 'gray' } />
-            //   );
+            } else if (route.name === 'All Posts') {
+              return (
+                <Ionicons name="home" size={25} color={focused ? COLORS.orange : 'gray' } />
+              );
             } else if (route.name === 'My Profile') {
               return (
                 <Ionicons name='person' size={25}  color={focused ? COLORS.orange : 'gray' }/>
@@ -54,10 +54,10 @@ export default function MainStack() {
           name="All Users"
           component={UsersStack}
         />
-        {/*<Tab.Screen*/}
-        {/*  name="All Posts"*/}
-        {/*  component={AllPosts}*/}
-        {/*/>*/}
+        <Tab.Screen
+          name="All Posts"
+          component={AllPosts}
+        />
         <Tab.Screen
           name="My Profile"
           component={MyProfileStack}

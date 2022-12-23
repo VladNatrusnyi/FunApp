@@ -1,7 +1,7 @@
-import MyProfile from "../screens/MyProfile";
+import MyProfile from "../screens/MyProfile/MyProfile";
 import CreateMeme from "../screens/CreateMeme";
 import {createStackNavigator} from "@react-navigation/stack";
-import {MemeItemPage} from "../screens/MemeItemPage";
+import {MemeItemPage} from "../screens/MyProfile/MemeItemPage";
 
 const Stack = createStackNavigator();
 

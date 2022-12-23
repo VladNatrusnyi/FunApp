@@ -1,28 +1,37 @@
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigation} from "@react-navigation/native";
-import {signOut} from "firebase/auth";
-import {auth} from "../config/firebase";
-import {USER_LOGOUT} from "../store/rootReducer";
-import React, {useEffect, useLayoutEffect, useMemo} from "react";
+import React, { useLayoutEffect } from "react";
 import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {COLORS} from "../assets/colors";
-import {AntDesign, Entypo} from "@expo/vector-icons";
-import colors from "../colors";
-import {getMemesForCurrentUser} from "../store/meme/memeActions";
+import {COLORS} from "../../assets/colors";
+import colors from "../../colors";
+import {useGetMemesForCurrentUserQuery, useGetMyMemesQuery} from "../../store/queries/dbApi";
+import Preloader from "../../components/ui/Preloader";
 
 export const UserProfile = ({route}) => {
 
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <Text style={{ color: COLORS.orange, fontSize: 20, fontWeight: "bold"}}>{userData.displayName}</Text>,
+    });
+  }, [navigation]);
+
   const { userData } = route.params
-  const dispatch = useDispatch()
 
-  useEffect(() => {
-    dispatch(getMemesForCurrentUser(userData.uid))
-  }, [userData])
+  const { someUserMemes, isFetching, isError  } = useGetMemesForCurrentUserQuery(userData.uid, {
+    skip: !userData,
+    selectFromResult: ({data}) => ({
+      someUserMemes: data?.someUserMemes
+    })
+  })
 
+  const memes = () => {
+    if (someUserMemes && !someUserMemes.length) {
+      return (
+        <Text style={styles.memeNotExist}>Користувач ще не створив своїх мемів</Text>
+      )
+    }
 
-  const someUserMemes = useSelector(state => state.memes.someUserMemes)
-
-  const memes = useMemo(() => {
     if (someUserMemes) {
       return (
         <View style={styles.row}>
@@ -48,35 +57,42 @@ export const UserProfile = ({route}) => {
           }
         </View>
       )
-    } else {
-      return (
-        <Text>Немає мемів</Text>
-      )
     }
-  }, [someUserMemes])
 
-  const navigation = useNavigation();
+    if (isFetching) {
+      return <Preloader />
+    }
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => <Text style={{ color: COLORS.orange, fontSize: 20, fontWeight: "bold"}}>{userData.displayName}</Text>,
-    });
-  }, [navigation]);
+    if (isError) {
+      return <Text style={{ color: 'red'}}>Виникла помилка завантаження</Text>
+    }
+  }
+
 
   return (
     <>
       <View style={{flex: 1}}>
 
         <View style={styles.head}>
-          <Image
-            style={{width: 100, height: 100}}
-            source={require('../assets/user.png')}
-            resizeMode='contain'
-          />
+          {
+            userData.photoURL
+              ?
+              <Image
+                style={{width: 100, height: 100, borderRadius: 100}}
+                source={{uri: userData.photoURL}}
+                resizeMode='contain'
+              />
+              :
+              <Image
+                style={{width: 100, height: 100}}
+                source={require('../../assets/user.png')}
+                resizeMode='contain'
+              />
+          }
           <Text style={styles.userName}>{userData.displayName}</Text>
         </View>
         <View style={styles.memes}>
-          { memes }
+          { memes() }
         </View>
       </View>
     </>
@@ -107,9 +123,6 @@ const styles = StyleSheet.create({
   memes: {
     flex: 1
   },
-
-
-
 
   container: {
     position: 'absolute',
@@ -148,4 +161,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'lightgray'
   },
+
+  memeNotExist: {
+    textAlign: "center",
+    marginTop: 20
+  }
 });

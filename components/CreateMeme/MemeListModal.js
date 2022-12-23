@@ -1,36 +1,43 @@
 import {Image, Modal, Pressable, Text, StyleSheet, View, ActivityIndicator} from "react-native";
 import React, {useEffect, useMemo} from "react";
-import {setIsOpenMemeListModal, setIsOpenModal} from "../store/create-meme/createMemeActions";
 import {useDispatch, useSelector} from "react-redux";
 import {MemeImgList} from "./MemeImgList";
-import {selectMemesImg} from "../store/memeImg/memeImgSelectors";
-import {COLORS} from "../assets/colors";
-import {loadMemesImg} from "../store/memeImg/memeImgActions";
+import {COLORS} from "../../assets/colors";
+import {useGetUsersQuery} from "../../store/queries/dbApi";
+import {useLoadMemesImgQuery} from "../../store/queries/imgFlipApi";
+import {setIsOpenMemeListModal} from "../../store/create-meme/createMemeSlice";
 
 
 export default function MemeListModal () {
   const dispatch = useDispatch()
   const isOpenMemeListModal = useSelector(state => state.createMeme.isOpenMemeListModal)
 
-  const isLoadedMemeImg = useSelector(state => state.memeImg.isLoadedMemeImg)
-  const memesImages = useSelector(selectMemesImg)
+  const { memesImage, isLoading, isError  } = useLoadMemesImgQuery(undefined, {
+    skip: !isOpenMemeListModal,
+    selectFromResult: ({data}) => ({
+      memesImage: data?.memesImg
+    })
+  })
 
-  useEffect(() => {
-    if (isOpenMemeListModal) {
-      dispatch(loadMemesImg())
-    }
-  }, [isOpenMemeListModal])
+  console.log('IMAGES MEME', memesImage)
 
-  const memeImages = useMemo(() => {
-    console.log('Changed isLoadedMeme', isLoadedMemeImg)
-    if (!isLoadedMemeImg) {
+  const memeImages = () => {
+    if (isLoading) {
       return(<ActivityIndicator size="large" color={COLORS.orange} />)
-    } else {
+    }
+
+    if (memesImage) {
       return (
-        <MemeImgList memeImages={memesImages}/>
+        <MemeImgList memeImages={memesImage}/>
       )
     }
-  }, [isLoadedMemeImg]);
+
+    if (isError) {
+      return (
+        <Text style={{ color: 'red'}}> Помилка завантаження </Text>
+      )
+    }
+  };
 
   return(
     <>
@@ -43,7 +50,7 @@ export default function MemeListModal () {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={{width: 250}}>
-              { memeImages }
+              { memeImages() }
             </View>
           </View>
         </View>

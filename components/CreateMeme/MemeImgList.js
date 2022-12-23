@@ -17,12 +17,12 @@ export const MemeImgList = ({ memeImages }) => {
     </View>
   )
 
-  if (memeImages.length === 0) {
+  if (memeImages && !memeImages.length) {
     content = (
       <View style={styles.imgWrap}>
         <Image
           style={styles.image}
-          source={require('../assets/no-items.png')}
+          source={require('../../assets/no-items.png')}
         />
         <Button style={{marginTop: 20}} title="Завантажити меми" />
       </View>

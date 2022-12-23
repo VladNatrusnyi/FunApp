@@ -1,44 +1,60 @@
 import {
   View,
-  Text,
-  TouchableOpacity,
   TextInput,
   SafeAreaView,
   StyleSheet,
-  ActivityIndicator,
-  Image, Alert, Button
+  Image, Alert
 } from "react-native";
-import {signOut} from "firebase/auth";
-import {auth} from "../config/firebase";
-import React, {useEffect, useLayoutEffect, useMemo, useState} from "react";
-import {AntDesign} from "@expo/vector-icons";
-import colors from "../colors";
+import React, {useLayoutEffect, useMemo, useState} from "react";
+
 import {useDispatch, useSelector} from "react-redux";
-import {setAuthIsLoading, setAuthUser} from "../store/auth/authActions";
-import API from "../api"
-import {loadMemesImg} from "../store/memeImg/memeImgActions";
-import {MemeImgList} from "../components/MemeImgList";
-import {selectMemesImg} from "../store/memeImg/memeImgSelectors";
-import {
-  clearMemeData,
-  createNewMeme,
-  setCreatedMemError,
-  setIsOpenMemeListModal,
-  setNewMemeText
-} from "../store/create-meme/createMemeActions";
 import MyButton from "../components/ui/MyButton";
 import MyModal from "../components/MyModal";
 import {COLORS} from "../assets/colors";
 import LightButton from "../components/ui/LightButton";
-import MemeListModal from "../components/MemeListModal";
-import {USER_LOGOUT} from "../store/rootReducer";
+import MemeListModal from "../components/CreateMeme/MemeListModal";
+import {
+  createMeme,
+  setCreatedMemError,
+  setIsOpenMemeListModal,
+  setMemeImg
+} from "../store/create-meme/createMemeSlice";
+
 
 
 export default function CreateMeme({ navigation }) {
   const dispatch = useDispatch()
-  const {memeImg, memeTopText, memeBottomText} = useSelector(state => state.createMeme.newMemeData)
+  const memeImg = useSelector(state => state.createMeme.memeImg)
   const error = useSelector(state => state.createMeme.error)
   const createdMeme = useSelector(state => state.createMeme.createdMeme)
+
+  const [memeTexts, setMemeTexts] = useState(null)
+
+  useMemo(() => {
+    if (memeImg) {
+      setMemeTexts(Object.assign({}, [...Array(memeImg.box_count).keys()].map((el, idx) => (''))))
+    }
+  }, [memeImg])
+
+  const inputs = useMemo(() => {
+    if (memeTexts) {
+      return Object.keys(memeTexts).map((input, idx) => {
+        return (
+          <TextInput
+            key={idx}
+            style={styles.input}
+            placeholder={`Введіть текст №${idx + 1}`}
+            autoCapitalize="none"
+            keyboardType="default"
+            value={memeTexts[input]}
+            onChangeText={(text) => setMemeTexts((memeTexts) => ({...memeTexts, [input]: text }))}
+          />
+        )
+      })
+    }
+
+  }, [memeTexts])
+
 
 
   useLayoutEffect(() => {
@@ -47,11 +63,17 @@ export default function CreateMeme({ navigation }) {
     });
   }, [navigation]);
 
+  //очищення полів воду і картинки
+  const clearFields = (data) => {
+    dispatch(setMemeImg(''))
+    setMemeTexts(data)
+  }
+
 
   const readyMeme = useMemo(() => {
     if (createdMeme) {
       return (
-        <MyModal memeImg={createdMeme.url}/>
+        <MyModal memeImg={createdMeme.url} clearFields={clearFields}/>
       )
     }
   }, [createdMeme])
@@ -62,67 +84,56 @@ export default function CreateMeme({ navigation }) {
       : {icon: 'add-circle-outline', text: 'Обрати мем'}
 
       return (
-        <LightButton
-          clickButton={() => dispatch(setIsOpenMemeListModal(true))}
-          text={status.text}
-          iconName={status.icon}
-        />
+        <View style={!memeImg && styles.btnWrap}>
+          <LightButton
+            style={{marginBottom: 15}}
+            clickButton={() => dispatch(setIsOpenMemeListModal(true))}
+            text={status.text}
+            iconName={status.icon}
+          />
+        </View>
       )
   }, [memeImg])
 
+  //Обробка помилки
   useMemo(() => {
     if (!!error) {
       Alert.alert(
         "Помилка", error,
-        [
-          { text: "OK", onPress: () => dispatch(setCreatedMemError(null)) }
-        ]
+        [{ text: "OK", onPress: () => dispatch(setCreatedMemError(null)) }]
       );
     }
   }, [error]);
 
-  const isNewMemeDataExist = useMemo(() => memeImg || memeTopText || memeBottomText,
-    [memeImg, memeTopText, memeBottomText])
+  // перевірка чи всі поля заповнені
+  const isNewMemeDataExist = useMemo(() => memeImg && memeTexts && Object.values(memeTexts).some(el => el !== ''),
+    [memeImg, memeTexts])
 
-  const setText = (position, text) => {
-    console.log('TEEEEXT', text)
-    dispatch(setNewMemeText(position, text))
-  }
+  const isNewMemeDataClearExist = useMemo(() => !!memeImg,
+    [memeImg])
 
-  const createMeme = () => {
-    if ((memeTopText || memeBottomText) && memeImg ) {
-      dispatch(createNewMeme())
+  //функція створення мему
+  const createNewMeme = () => {
+    if (isNewMemeDataExist ) {
+      const data = Object.values(memeTexts).map(meme => ({text : meme}))
+
+      console.log('Меме дата', data)
+      dispatch(createMeme({
+        template_id: memeImg.memeId,
+        boxes: data
+      }))
     } else {
       dispatch(setCreatedMemError('Ви не ввели необхідні дані'))
     }
   }
 
-  const clearMemeCreationData = () => {
-    dispatch(clearMemeData())
-  }
 
   return (
     <View style={styles.container}>
       { readyMeme }
       <MemeListModal />
       <SafeAreaView style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Введіть перший напис"
-          autoCapitalize="none"
-          keyboardType="default"
-          value={memeTopText}
-          onChangeText={(text) => setText('top', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Введіть другий напис"
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={memeBottomText}
-          onChangeText={(text) => setText('bottom', text)}
-        />
-
+        <View>{inputs}</View>
 
         { chooseMemeImgButton }
 
@@ -139,11 +150,12 @@ export default function CreateMeme({ navigation }) {
         </View>
         }
 
-        { isNewMemeDataExist
-          ? <MyButton clickButton={clearMemeCreationData} text="Очистити" bgColor="gray"/>
-          : null
-        }
-        <MyButton clickButton={createMeme} text="Створити мем" bgColor={COLORS.orange}/>
+        <>
+          { isNewMemeDataClearExist && <MyButton clickButton={() => clearFields(null)} text="Очистити" bgColor="gray"/> }
+
+          { isNewMemeDataExist && <MyButton clickButton={createNewMeme} text="Створити мем" bgColor={COLORS.orange}/> }
+        </>
+
       </SafeAreaView>
     </View>
   )
@@ -197,5 +209,15 @@ const styles = StyleSheet.create({
   checkedImgWrap: {
     alignItems: 'center',
     marginBottom: 10,
+  },
+
+  btnWrap: {
+    justifyContent: "center",
+    marginVertical: 'auto',
+    padding: 30,
+    borderColor: COLORS.orange,
+    borderWidth: 2,
+    borderRadius: 10,
+    borderStyle: "dashed"
   }
 });

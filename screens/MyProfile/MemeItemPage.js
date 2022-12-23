@@ -1,10 +1,9 @@
 import {Image, Text, View} from "react-native";
 import React, {useEffect, useLayoutEffect, useMemo, useState} from "react";
-import apiDB from "../apiDB";
-import {addToFavourite, GET_MY_MEMES} from "../store/meme/memeActions";
-import {COLORS} from "../assets/colors";
-import Preloader from "../components/ui/Preloader";
-import MyButton from "../components/ui/MyButton";
+import apiDB from "../../apiDB";
+import {COLORS} from "../../assets/colors";
+import Preloader from "../../components/ui/Preloader";
+import MyButton from "../../components/ui/MyButton";
 import {useDispatch, useSelector} from "react-redux";
 
 
@@ -66,7 +65,7 @@ export const MemeItemPage = ({navigation, route}) => {
               {
                 loggedUser !== currentUser.uid
                 &&
-                <MyButton clickButton={() => dispatch(addToFavourite(memeData.id))} text="Додати до улюблених" bgColor={COLORS.orange}/>
+                <MyButton clickButton={() => {}} text="Додати до улюблених" bgColor={COLORS.orange}/>
               }
             </>
         }
