@@ -1,11 +1,16 @@
-import {MemePage} from "./MemePage";
+import {MemeCard} from "./MemeCard/MemeCard";
+import {Button, View} from "react-native";
+import apiDB from "../apiDB";
+import {useMemo, useState} from "react";
 
 
 export function AllPosts () {
 
+
   return (
     <>
-      <MemePage />
+      {/*<MemeCard />*/}
+        {/*<Button title={'Sciwjdcedofvodjvsd'} onPress={foo}/>*/}
     </>
   )
 }

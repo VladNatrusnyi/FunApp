@@ -47,6 +47,16 @@ export const dbApi = createApi({
       providesTags: ['dbData']
     }),
 
+    getCurrentMeme: builder.query({
+      query: (id) => ({
+        url: `memes/${id}.json?`
+      }),
+      transformResponse: (response) => ({
+        memeData: response
+      }),
+      providesTags: (result, error, id) => [{ type: 'dbData', id }],
+    }),
+
 //USERS ENDPOINTS===========================================
 
     getUsers: builder.query({
@@ -62,6 +72,21 @@ export const dbApi = createApi({
       }),
       providesTags: ['dbData'],
     }),
+
+    getCurrentUser: builder.query({
+      query: (userId) => ({
+        url: `users.json?orderBy="uid"&equalTo=${JSON.stringify(userId)}`
+      }),
+      transformResponse: (response) => ({
+        user: Object.keys(response).map(item => {
+          return response[item]
+        })[0]
+      }),
+      providesTags: ['dbData'],
+    }),
+
+
+
 
     publishMeme: builder.mutation({
       query: body => ({
@@ -81,7 +106,26 @@ export const dbApi = createApi({
           // dispatch(getMyMemes())
         }, 2500)
       }
-    })
+    }),
+
+
+    deleteMeme: builder.mutation({
+      query: memeId => ({
+        url: `memes/${memeId}.json`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: [{type: 'dbData', id: 'myMemes'}],
+    }),
+
+
+    toggleLikesMeme: builder.mutation({
+      query: ({body, id}) => ({
+        url: `memes/${id}/likes.json`,
+        method: 'PUT',
+        body
+      }),
+      invalidatesTags: (result, error, {id}) => [{ type: 'dbData', id }],
+    }),
 
   })
 })
@@ -91,7 +135,12 @@ export const {
   useGetMyMemesQuery,
   useGetMemesForCurrentUserQuery,
   useGetUsersQuery,
+  useGetCurrentUserQuery,
+  useGetCurrentMemeQuery,
 
-  usePublishMemeMutation
+
+  usePublishMemeMutation,
+  useDeleteMemeMutation,
+  useToggleLikesMemeMutation,
 } = dbApi
 

@@ -1,4 +1,5 @@
 import createMemeSlice from "./create-meme/createMemeSlice";
+import memeOperationsSlice from "./memeOperations/memeOperations";
 
 export const USER_LOGOUT = '@@logout/USER_LOGOUT'
 
@@ -11,6 +12,7 @@ import {dbApi} from "./queries/dbApi";
 const combinedReducer = combineReducers({
   auth: authSlice,
   createMeme: createMemeSlice,
+  currentMeme: memeOperationsSlice,
   [dbApi.reducerPath]: dbApi.reducer,
   [imgFlipApi.reducerPath]: imgFlipApi.reducer,
 });

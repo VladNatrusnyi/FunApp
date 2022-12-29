@@ -3,7 +3,7 @@ import {
   TextInput,
   SafeAreaView,
   StyleSheet,
-  Image, Alert
+  Image, Alert, ScrollView
 } from "react-native";
 import React, {useLayoutEffect, useMemo, useState} from "react";
 
@@ -129,7 +129,7 @@ export default function CreateMeme({ navigation }) {
 
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       { readyMeme }
       <MemeListModal />
       <SafeAreaView style={styles.form}>
@@ -157,7 +157,7 @@ export default function CreateMeme({ navigation }) {
         </>
 
       </SafeAreaView>
-    </View>
+    </ScrollView>
   )
 }
 

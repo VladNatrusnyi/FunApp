@@ -3,7 +3,7 @@ import CreateMeme from "../screens/CreateMeme";
 import {createStackNavigator} from "@react-navigation/stack";
 import {AllUsers} from "../screens/AllUsers";
 import {UserProfile} from "../screens/UserProfile/UserProfile";
-import {UserProfileMemeItem} from "../screens/UserProfile/UserProfileMemeItem";
+import {MemePage} from "../screens/MemeCard/MemePage";
 
 const Stack = createStackNavigator();
 
@@ -12,7 +12,7 @@ export default function UsersStack() {
     <Stack.Navigator defaultScreenOptions={AllUsers}>
       <Stack.Screen name='Users' component={AllUsers} />
       <Stack.Screen name='User profile' component={UserProfile} />
-      <Stack.Screen name='User profile item' component={UserProfileMemeItem} />
+      <Stack.Screen name='User profile item' component={MemePage} />
     </Stack.Navigator>
   );
 }

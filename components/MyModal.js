@@ -26,7 +26,7 @@ export default function MyModal({ memeImg, clearFields }) {
       url: createdMeme,
       creatorId: creator,
       date: new Date(),
-      likes: 0,
+      likes: '',
       comments: ''
     }))
 
