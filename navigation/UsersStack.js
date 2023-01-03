@@ -4,6 +4,7 @@ import {createStackNavigator} from "@react-navigation/stack";
 import {AllUsers} from "../screens/AllUsers";
 import {UserProfile} from "../screens/UserProfile/UserProfile";
 import {MemePage} from "../screens/MemeCard/MemePage";
+import {LikesPage} from "../screens/LikesPage";
 
 const Stack = createStackNavigator();
 
@@ -13,6 +14,7 @@ export default function UsersStack() {
       <Stack.Screen name='Users' component={AllUsers} />
       <Stack.Screen name='User profile' component={UserProfile} />
       <Stack.Screen name='User profile item' component={MemePage} />
+        <Stack.Screen name='Likes' component={LikesPage} />
     </Stack.Navigator>
   );
 }

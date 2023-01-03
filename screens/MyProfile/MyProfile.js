@@ -11,6 +11,8 @@ import {auth} from "../../config/firebase";
 import {USER_LOGOUT} from "../../store";
 import {CustomMenu} from "../../components/CustomMenu";
 import UserPersonalDataModal from "../../components/UserPersonalDataModal";
+import LightButton from "../../components/ui/LightButton";
+import {SubscribeInfoBlock} from "../../components/SubscribeInfoBlock";
 const catImageUrl = "https://i.guim.co.uk/img/media/26392d05302e02f7bf4eb143bb84c8097d09144b/446_167_3683_2210/master/3683.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=49ed3252c0b2ffb49cf8b508892e452d";
 
 const MyProfile = () => {
@@ -66,6 +68,9 @@ const MyProfile = () => {
               />
           }
           <Text style={styles.userName}>{userName}</Text>
+
+          <SubscribeInfoBlock />
+
         </View>
         <View style={styles.memes}>
           <Tabs />
@@ -91,13 +96,14 @@ export default MyProfile;
 
 const styles = StyleSheet.create({
   head: {
-    height: 200,
+    width: '100%',
+    height: 250,
     backgroundColor: '#fff',
     // borderBottomWidth: 2,
     // borderBottomColor: 'black',
     alignItems: "center",
     paddingVertical: 20,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
 
   userName: {
@@ -111,9 +117,6 @@ const styles = StyleSheet.create({
   memes: {
     flex: 1
   },
-
-
-
 
   container: {
     position: 'absolute',

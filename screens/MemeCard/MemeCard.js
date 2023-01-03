@@ -7,7 +7,7 @@ import {whereCreated} from "../../helpers/whereCreated";
 import {MemeSettings} from "./MemeSettings";
 import {useGetCurrentMemeQuery, useGetCurrentUserQuery, useToggleLikesMemeMutation} from "../../store/queries/dbApi";
 import Preloader from "../../components/ui/Preloader";
-import {getUsersWhoLiked} from "../../store/memeOperations/memeOperations";
+import {clearUsersWhoLiked, getUsersWhoLiked, setUsersWhoLiked} from "../../store/memeOperations/memeOperations";
 import {useNavigation} from "@react-navigation/native";
 
 
@@ -15,10 +15,25 @@ export const MemeCard = ({meme}) => {
   const dispatch = useDispatch()
   const navigation = useNavigation();
 
+  const { memeData } = useGetCurrentMemeQuery(meme.id, {
+    skip: !meme.id,
+    selectFromResult: ({data}) => ({
+      memeData: data?.memeData
+    })
+  })
+
+  useEffect(() => {
+    if (memeData && memeData.likes) {
+      dispatch(getUsersWhoLiked(memeData.likes))
+    } else {
+      dispatch(clearUsersWhoLiked([]))
+    }
+  }, [memeData])
+
   const usersWhoLiked = useSelector(state => state.currentMeme.usersWhoLiked)
 
   const likedUsersText = useMemo(() => {
-    if (usersWhoLiked.length) {
+    if (usersWhoLiked && usersWhoLiked.length) {
       if (usersWhoLiked.length === 1) {
         return `Уподобав ${usersWhoLiked[usersWhoLiked.length - 1].displayName}`
       }
@@ -32,18 +47,6 @@ export const MemeCard = ({meme}) => {
 
   const loggedUser = useSelector(state => state.auth.user.uid)
 
-  const { memeData } = useGetCurrentMemeQuery(meme.id, {
-    skip: !meme.id,
-    selectFromResult: ({data}) => ({
-      memeData: data?.memeData
-    })
-  })
-
-  useEffect(() => {
-    if (memeData && memeData.likes) {
-      dispatch(getUsersWhoLiked(memeData.likes))
-    }
-  }, [memeData])
 
 
   const uid = useMemo(() => {
@@ -97,24 +100,35 @@ export const MemeCard = ({meme}) => {
               ? <Preloader />
               : <View style={ styles.wrapper }>
                 <View style={ styles.head }>
-                  <View style={ styles.headLeftPart }>
-                    {
-                      user.photoURL
-                          ?
-                          <Image
-                              style={styles.userLogo}
-                              source={{uri: user.photoURL}}
-                              resizeMode='contain'
-                          />
-                          :
-                          <Image
-                              style={styles.userLogo}
-                              source={require('../../assets/user.png')}
-                              resizeMode='contain'
-                          />
-                    }
-                    <Text style={styles.userName}>{user.displayName}</Text>
-                  </View>
+                  <TouchableOpacity
+                      activeOpacity={0.5}
+                      onPress={() => {
+                        if (user.uid === loggedUser) {
+                          navigation.navigate("My Profile2")
+                        } else {
+                          navigation.navigate("User profile", {userData: user})
+                        }
+                      } }
+                  >
+                    <View style={ styles.headLeftPart }>
+                      {
+                        user.photoURL
+                            ?
+                            <Image
+                                style={styles.userLogo}
+                                source={{uri: user.photoURL}}
+                                resizeMode='contain'
+                            />
+                            :
+                            <Image
+                                style={styles.userLogo}
+                                source={require('../../assets/user.png')}
+                                resizeMode='contain'
+                            />
+                      }
+                      <Text style={styles.userName}>{user.displayName}</Text>
+                    </View>
+                  </TouchableOpacity>
                   <View style={ styles.headRightPart }>
                     {
                         loggedUser === user.uid &&
@@ -155,7 +169,7 @@ export const MemeCard = ({meme}) => {
                 <View>
                   {
                       likedUsersText &&
-                      <TouchableOpacity onPress={() => {navigation.navigate('Likes')}}>
+                      <TouchableOpacity onPress={() => {navigation.navigate('Likes', {usersWhoLiked})}}>
                         <Text style={styles.liked}>{ likedUsersText }</Text>
                       </TouchableOpacity>
                   }

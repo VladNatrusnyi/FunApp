@@ -12,7 +12,7 @@ export default function MyProfileStack() {
       <Stack.Screen name='My Profile2' component={MyProfile} />
       <Stack.Screen name='Create Meme' component={CreateMeme} />
       <Stack.Screen name='Meme item' component={MemePage} />
-        <Stack.Screen name='Likes' component={LikesPage} />
+      <Stack.Screen name='Likes' component={LikesPage} />
     </Stack.Navigator>
   );
 }

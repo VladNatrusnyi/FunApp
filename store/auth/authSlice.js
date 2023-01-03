@@ -39,6 +39,21 @@ const authSlice = createSlice({
   },
 })
 
+export const getUser = createAsyncThunk(
+    'auth/getUser',
+    (_, {dispatch, getState}) => {
+        apiDB.get(`users.json?orderBy="uid"&equalTo=${JSON.stringify(getState().auth.user.uid)}`)
+            .then(function (response) {
+                const data = Object.keys(response.data).map(item => response.data[item])
+                console.log('Users DATA2', data);
+                dispatch(getCurrentUser(data[0]))
+            })
+            .catch(function (error) {
+                console.log('Дані юзера у БД  НЕ Змінені',error);
+            });
+    }
+)
+
 export const setAuthUser = createAsyncThunk(
   'auth/setAuthUser',
   (_, {dispatch, getState}) => {

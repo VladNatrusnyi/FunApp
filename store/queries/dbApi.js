@@ -1,5 +1,6 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/dist/query/react";
 import {clearCreatedMeme, clearMemeData, setIsOpenModal, setIsPublished} from "../create-meme/createMemeSlice";
+import {getUser, setAuthUser} from "../auth/authSlice";
 
 const baseURL = `https://funapp-caaf5-default-rtdb.firebaseio.com/`
 
@@ -54,7 +55,7 @@ export const dbApi = createApi({
       transformResponse: (response) => ({
         memeData: response
       }),
-      providesTags: (result, error, id) => [{ type: 'dbData', id }],
+        providesTags: (result, error, id) => [{ type: 'dbData', id }],
     }),
 
 //USERS ENDPOINTS===========================================
@@ -70,7 +71,7 @@ export const dbApi = createApi({
           }
         })
       }),
-      providesTags: ['dbData'],
+      providesTags: ['dbData']
     }),
 
     getCurrentUser: builder.query({
@@ -82,7 +83,7 @@ export const dbApi = createApi({
           return response[item]
         })[0]
       }),
-      providesTags: ['dbData'],
+      providesTags: (result, error, userId) => [{ type: 'dbData', id: `User:${userId}` }],
     }),
 
 
@@ -127,6 +128,18 @@ export const dbApi = createApi({
       invalidatesTags: (result, error, {id}) => [{ type: 'dbData', id }],
     }),
 
+    toggleSubscribeUser: builder.mutation({
+      query: ({body, id}) => ({
+        url: `users/${id}/follow.json`,
+        method: 'PUT',
+        body
+      }),
+      // async onCacheEntryAdded(_, { dispatch}) {
+      //   dispatch(getUser())
+      // },
+      invalidatesTags: (result, error, {id}) => [{ type: 'dbData', id: `User:${id}` }],
+    }),
+
   })
 })
 
@@ -142,5 +155,6 @@ export const {
   usePublishMemeMutation,
   useDeleteMemeMutation,
   useToggleLikesMemeMutation,
+  useToggleSubscribeUserMutation,
 } = dbApi
 

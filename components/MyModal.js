@@ -57,6 +57,7 @@ export default function MyModal({ memeImg, clearFields }) {
                     source={{
                       uri: memeImg,
                     }}
+                    resizeMode='contain'
                   />
                 </View>
                 {/*<Pressable*/}
