@@ -1,6 +1,7 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/dist/query/react";
 import {clearCreatedMeme, clearMemeData, setIsOpenModal, setIsPublished} from "../create-meme/createMemeSlice";
 import {getUser, setAuthUser} from "../auth/authSlice";
+import {getFavouriteMeme} from "../memeOperations/memeOperations";
 
 const baseURL = `https://funapp-caaf5-default-rtdb.firebaseio.com/`
 
@@ -55,7 +56,8 @@ export const dbApi = createApi({
       transformResponse: (response) => ({
         memeData: response
       }),
-        providesTags: (result, error, id) => [{ type: 'dbData', id }],
+        providesTags: (result, error, id) => [{ type: 'dbData', id },
+          { type: 'dbData', id: `Favourite${id}` }],
     }),
 
 //USERS ENDPOINTS===========================================
@@ -83,7 +85,7 @@ export const dbApi = createApi({
           return response[item]
         })[0]
       }),
-      providesTags: (result, error, userId) => [{ type: 'dbData', id: `User:${userId}` }],
+      providesTags: (result, error, userId) => [{ type: 'dbData', id: `User` }],
     }),
 
 
@@ -134,10 +136,40 @@ export const dbApi = createApi({
         method: 'PUT',
         body
       }),
-      // async onCacheEntryAdded(_, { dispatch}) {
-      //   dispatch(getUser())
-      // },
-      invalidatesTags: (result, error, {id}) => [{ type: 'dbData', id: `User:${id}` }],
+      // invalidatesTags: (result, error, {id}) => [{ type: 'dbData', id: `User:${id}` }],
+    }),
+
+    toggleFollowMe: builder.mutation({
+      query: ({body, id}) => ({
+        url: `users/${id}/followMe.json`,
+        method: 'PUT',
+        body
+      }),
+      transformResponse: (response) => ({
+        followMeData: response
+      }),
+      invalidatesTags: (result, error, {id}) => [{ type: 'dbData', id: `User` }],
+    }),
+
+    toggleFavouriteMeme: builder.mutation({
+      query: ({body, uid, memeId}) => ({
+        url: `users/${uid}/favouriteMemes.json`,
+        method: 'PUT',
+        body
+      }),
+      transformResponse: (response) => ({
+        favouriteMemeData: response
+      }),
+      async onCacheEntryAdded(
+          arg,
+          {
+            dispatch,
+            getState,
+          }
+      ) {
+        await dispatch(getFavouriteMeme(JSON.stringify(arg.body)))
+      },
+      invalidatesTags: (result, error, {memeId}) => [{ type: 'dbData', id: `Favourite${memeId}` }],
     }),
 
   })
@@ -156,5 +188,7 @@ export const {
   useDeleteMemeMutation,
   useToggleLikesMemeMutation,
   useToggleSubscribeUserMutation,
+  useToggleFollowMeMutation,
+  useToggleFavouriteMemeMutation,
 } = dbApi
 

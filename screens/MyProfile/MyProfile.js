@@ -12,13 +12,17 @@ import {USER_LOGOUT} from "../../store";
 import {CustomMenu} from "../../components/CustomMenu";
 import UserPersonalDataModal from "../../components/UserPersonalDataModal";
 import LightButton from "../../components/ui/LightButton";
-import {SubscribeInfoBlock} from "../../components/SubscribeInfoBlock";
+import {SubscribeInfoBlock} from "../../components/Subscribe/SubscribeInfoBlock";
 const catImageUrl = "https://i.guim.co.uk/img/media/26392d05302e02f7bf4eb143bb84c8097d09144b/446_167_3683_2210/master/3683.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=49ed3252c0b2ffb49cf8b508892e452d";
 
 const MyProfile = () => {
   const dispatch = useDispatch()
   const userName = useSelector(state => state.auth.user.displayName)
   const userAvatar = useSelector(state => state.auth.user.photoURL)
+
+  const userData = useSelector(state => state.auth.user)
+
+
 
   const navigation = useNavigation();
 
@@ -69,7 +73,7 @@ const MyProfile = () => {
           }
           <Text style={styles.userName}>{userName}</Text>
 
-          <SubscribeInfoBlock />
+          <SubscribeInfoBlock userData={userData}/>
 
         </View>
         <View style={styles.memes}>

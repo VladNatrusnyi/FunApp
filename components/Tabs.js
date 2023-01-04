@@ -2,7 +2,7 @@ import {View, useWindowDimensions} from 'react-native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {useMemo, useState} from "react";
 import {COLORS} from "../assets/colors";
-import {MyMemeList} from "./MyMemes/MyMemesList";
+import {MyMemeList} from "./MemeGrid/MyMemesList";
 import {useDispatch, useSelector} from "react-redux";
 
 

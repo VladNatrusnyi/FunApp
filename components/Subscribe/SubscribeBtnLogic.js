@@ -1,15 +1,28 @@
 import {Text, View} from "react-native";
-import LightButton from "./ui/LightButton";
-import React, {useEffect, useMemo} from "react";
-import {useToggleSubscribeUserMutation} from "../store/queries/dbApi";
-import {getUser} from "../store/auth/authSlice";
+import LightButton from "../ui/LightButton";
+import React, {useEffect, useMemo, useState} from "react";
+import {
+    useGetCurrentUserQuery,
+    useToggleFollowMeMutation,
+    useToggleSubscribeUserMutation
+} from "../../store/queries/dbApi";
+import {getUser} from "../../store/auth/authSlice";
 import {useDispatch, useSelector} from "react-redux";
-import SubscribeBtn from "./ui/SubscribeBtn";
+import SubscribeBtn from "../ui/SubscribeBtn";
 
 export const SubscribeBtnLogic = ({user}) => {
     const dispatch = useDispatch()
 
     const loggedUser = useSelector(state => state.auth.user)
+
+    // const [userStatus, setUserStatus] = useState(false)
+
+    // const { user, isLoading } = useGetCurrentUserQuery('wkq6Z8Da7eU92FePbQZiOz0nsBe2', {
+    //     skip: !userStatus,
+    //     selectFromResult: ({data}) => ({
+    //         user: data?.user
+    //     })
+    // })
 
     const isFollowedUser = useMemo(() => {
         if (loggedUser && user) {
@@ -19,7 +32,16 @@ export const SubscribeBtnLogic = ({user}) => {
 
     const [toggleSubscribeUser, {data}] = useToggleSubscribeUserMutation()
 
-    useEffect(() => { dispatch(getUser()) }, [data])
+    const [toggleFollowMe, {followMeData}] = useToggleFollowMeMutation({
+        selectFromResult: ({data}) => ({
+            followMeData: data?.followMeData
+        })
+    })
+
+
+
+
+    useEffect(() => { dispatch(getUser()) }, [data, followMeData])
 
     // subscribe operations
     const followUser = () => {
@@ -28,6 +50,10 @@ export const SubscribeBtnLogic = ({user}) => {
         if (user) {
             arr.push(user.uid)
             toggleSubscribeUser({body: JSON.stringify(arr), id: loggedUser.dbId})
+
+            let followMe = user.followMe ? [...user.followMe] : []
+            followMe.push(loggedUser.uid)
+            toggleFollowMe({body: JSON.stringify(followMe), id: user.dbId})
         }
     }
 
@@ -38,6 +64,10 @@ export const SubscribeBtnLogic = ({user}) => {
         if (user) {
             arr.push(user.uid)
             toggleSubscribeUser({body: JSON.stringify(arr.filter(item => item !== user.uid)), id: loggedUser.dbId})
+
+            let followMe = user.followMe ? [...user.followMe] : []
+            // followMe.push(loggedUser.uid)
+            toggleFollowMe({body: JSON.stringify(followMe.filter(item => item !== loggedUser.uid)), id: user.dbId})
         }
     }
 

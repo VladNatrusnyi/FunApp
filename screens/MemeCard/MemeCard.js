@@ -5,10 +5,16 @@ import {COLORS} from "../../assets/colors";
 import {AntDesign, Ionicons, SimpleLineIcons} from "@expo/vector-icons";
 import {whereCreated} from "../../helpers/whereCreated";
 import {MemeSettings} from "./MemeSettings";
-import {useGetCurrentMemeQuery, useGetCurrentUserQuery, useToggleLikesMemeMutation} from "../../store/queries/dbApi";
+import {
+  useGetCurrentMemeQuery,
+  useGetCurrentUserQuery, useToggleFavouriteMemeMutation,
+  useToggleFollowMeMutation,
+  useToggleLikesMemeMutation
+} from "../../store/queries/dbApi";
 import Preloader from "../../components/ui/Preloader";
 import {clearUsersWhoLiked, getUsersWhoLiked, setUsersWhoLiked} from "../../store/memeOperations/memeOperations";
 import {useNavigation} from "@react-navigation/native";
+import {getUser} from "../../store/auth/authSlice";
 
 
 export const MemeCard = ({meme}) => {
@@ -46,6 +52,7 @@ export const MemeCard = ({meme}) => {
   }, [usersWhoLiked])
 
   const loggedUser = useSelector(state => state.auth.user.uid)
+  const loggedUserData = useSelector(state => state.auth.user)
 
 
 
@@ -70,7 +77,23 @@ export const MemeCard = ({meme}) => {
     }
   }, [memeData])
 
+  const isYouAddToFavouriteMeme = useMemo(() => {
+    let favourite = loggedUserData && loggedUserData.favouriteMemes
+    return favourite && memeData ? favourite.includes(meme.id) : false
+
+  }, [loggedUserData, memeData])
+
+
+
   const [toggleLikesMeme, {data, isLoading, isError}] = useToggleLikesMemeMutation()
+
+  const [toggleFavouriteMeme, {favouriteMemeData}] = useToggleFavouriteMemeMutation({
+    selectFromResult: ({data}) => ({
+      favouriteMemeData: data?.favouriteMemeData
+    })
+  })
+
+  useEffect(() => {dispatch(getUser())}, [favouriteMemeData])
 
   const addLike = async () => {
     let likes = memeData && memeData.likes
@@ -90,6 +113,24 @@ export const MemeCard = ({meme}) => {
     await toggleLikesMeme({body: JSON.stringify(arr.filter(item => item !== loggedUser)), id: meme.id})
     if (data) {
       console.log('LIKED Success')
+    }
+  }
+
+
+  const addToFavourite = () => {
+    if (loggedUserData && memeData) {
+      const arr = loggedUserData.favouriteMemes ? [...loggedUserData.favouriteMemes] : []
+      arr.push(meme.id)
+      console.log('Add fav', arr)
+      toggleFavouriteMeme({body: JSON.stringify(arr), uid: loggedUserData.dbId, memeId: meme.id })
+    }
+  }
+
+  const removeFromFavourite = () => {
+    console.log('remove fav')
+    if (loggedUserData && memeData) {
+      const arr = loggedUserData.favouriteMemes ? [...loggedUserData.favouriteMemes] : []
+      toggleFavouriteMeme({body: JSON.stringify(arr.filter(item => item !== meme.id)), uid: loggedUserData.dbId, memeId: meme.id })
     }
   }
 
@@ -162,8 +203,19 @@ export const MemeCard = ({meme}) => {
                     <AntDesign name="message1" size={24} color="gray" />
                   </View>
                   <View>
-                    {/*<Ionicons name="bookmark" size={24} color="black" />*/}
-                    <Ionicons name="bookmark-outline" size={24} color="gray" />
+
+                    {
+
+                      isYouAddToFavouriteMeme ?
+                          <TouchableOpacity onPress={removeFromFavourite}>
+                            <Ionicons name="bookmark" size={24} color="black" />
+                          </TouchableOpacity>
+                          :
+                          <TouchableOpacity onPress={addToFavourite}>
+                            <Ionicons name="bookmark-outline" size={24} color="gray" />
+                          </TouchableOpacity>
+                    }
+
                   </View>
                 </View>
                 <View>

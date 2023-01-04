@@ -3,8 +3,8 @@ import {useNavigation} from "@react-navigation/native";
 import SubscribeBtn from "../ui/SubscribeBtn";
 import {COLORS} from "../../assets/colors";
 import MyButton from "../ui/MyButton";
-import {SubscribeInfoBlock} from "../SubscribeInfoBlock";
-import {SubscribeBtnLogic} from "../SubscribeBtnLogic";
+import {SubscribeInfoBlock} from "../Subscribe/SubscribeInfoBlock";
+import {SubscribeBtnLogic} from "../Subscribe/SubscribeBtnLogic";
 import React from "react";
 import {useSelector} from "react-redux";
 

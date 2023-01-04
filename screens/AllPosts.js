@@ -3,19 +3,25 @@ import {Button, View} from "react-native";
 import apiDB from "../apiDB";
 import {useMemo, useState} from "react";
 import {getCurrentUser} from "../store/auth/authSlice";
+import {useGetCurrentUserQuery} from "../store/queries/dbApi";
 
-
+//pollingInterval – дозволяє запиту автоматично перезавантажуватися через заданий інтервал, указаний у мілісекундах.
 export function AllPosts () {
 
-  const foo = () => {
-    apiDB.get(`users.json?orderBy="follow"&equalTo="HfSUlahvjAQeCGIAtVLsbdCl6AY2"`)
-        .then(function (response) {
-          console.log('Фігня якась', response);
+    const [status, setStatus] = useState(false)
+
+    const { user, isLoading } = useGetCurrentUserQuery('wkq6Z8Da7eU92FePbQZiOz0nsBe2', {
+        skip: !status,
+        selectFromResult: ({data}) => ({
+            user: data?.user
         })
-        .catch(function (error) {
-          console.log('Фігня не працює',error);
-        });
+    })
+
+  const foo = () => {
+      setStatus(status => !status)
   }
+
+  console.log('PROBA', user)
 
 
   return (
