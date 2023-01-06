@@ -7,6 +7,8 @@ import {MemePage} from "../screens/MemeCard/MemePage";
 import {LikesPage} from "../screens/LikesPage";
 import {FollowList} from "../screens/Follow/FollowList";
 import {FollowMeList} from "../screens/Follow/FollowMeList";
+import {CommentsPage} from "../screens/CommentsPage";
+import MemePageStack from "./MemePageStack";
 
 const Stack = createStackNavigator();
 
@@ -17,6 +19,7 @@ export default function UsersStack() {
       <Stack.Screen name='User profile' component={UserProfile} />
       <Stack.Screen name='User profile item' component={MemePage} />
       <Stack.Screen name='Likes' component={LikesPage} />
+        <Stack.Screen name='Comments' component={CommentsPage} />
       <Stack.Screen name='FollowUserList' component={FollowList} />
       <Stack.Screen name='FollowMeUserList' component={FollowMeList} />
     </Stack.Navigator>

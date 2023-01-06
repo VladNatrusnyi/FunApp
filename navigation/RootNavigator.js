@@ -9,6 +9,8 @@ import {useDispatch, useSelector} from "react-redux";
 import MainStack from "./MainStack";
 import {setAuthIsLoading, setAuthUser} from "../store/auth/authSlice";
 import {COLORS} from "../assets/colors";
+import {getDatabase, onValue, ref} from "firebase/database";
+import {getFavouriteMeme} from "../store/memeOperations/memeOperations";
 
 export default function RootNavigator() {
   const dispatch = useDispatch();
@@ -24,6 +26,7 @@ export default function RootNavigator() {
 
     return unsubscribeAuth;
   }, []);
+
 
 
   if (isLoading) {

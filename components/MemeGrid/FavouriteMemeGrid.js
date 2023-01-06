@@ -4,8 +4,9 @@ import {useGetMyMemesQuery} from "../../store/queries/dbApi";
 import Preloader from "../ui/Preloader";
 import {MemeGrid} from "./MemeGrid";
 import {Text} from "react-native";
-import {useEffect} from "react";
-import {getFavouriteMeme} from "../../store/memeOperations/memeOperations";
+import {useEffect, useMemo} from "react";
+import {clearFavouriteMeme, getFavouriteMeme} from "../../store/memeOperations/memeOperations";
+import {getDatabase, onValue, ref} from "firebase/database";
 
 export const FavouriteMemeGrid = () => {
     const navigation = useNavigation();
@@ -16,9 +17,12 @@ export const FavouriteMemeGrid = () => {
     const {favouriteMeme, isLoad} = useSelector(state => state.currentMeme)
 
 
+
     useEffect(() => {
-        if (!favouriteMeme.length) { dispatch(getFavouriteMeme(loggedUser.favouriteMemes)) }
+        if (!favouriteMeme.length && loggedUser.favouriteMemes) { dispatch(getFavouriteMeme(loggedUser.favouriteMemes)) }
     },[])
+
+
 
     if (!loggedUser.favouriteMemes || !loggedUser.favouriteMemes.length) {
         return (
@@ -27,7 +31,7 @@ export const FavouriteMemeGrid = () => {
     }
 
 
-    if (favouriteMeme) {
+    if (favouriteMeme.length) {
         return (
             <MemeGrid memeArr={favouriteMeme} type={'me'}/>
         )

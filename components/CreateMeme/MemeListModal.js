@@ -19,7 +19,7 @@ export default function MemeListModal () {
     })
   })
 
-  console.log('IMAGES MEME', memesImage)
+  // console.log('IMAGES MEME', memesImage)
 
   const memeImages = () => {
     if (isLoading) {

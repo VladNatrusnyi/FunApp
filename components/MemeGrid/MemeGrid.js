@@ -8,7 +8,7 @@ export const MemeGrid = ({memeArr, type}) => {
     return (
         <View style={styles.row}>
             {
-                memeArr.map(item => {
+                memeArr && memeArr.map(item => {
                     return (
                         <TouchableOpacity
                             key={item.date}

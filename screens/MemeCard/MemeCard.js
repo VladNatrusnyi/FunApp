@@ -173,7 +173,7 @@ export const MemeCard = ({meme}) => {
                   <View style={ styles.headRightPart }>
                     {
                         loggedUser === user.uid &&
-                        <MemeSettings memeId={memeData.id}/>
+                        <MemeSettings memeId={meme.id}/>
                     }
                   </View>
                 </View>
@@ -200,7 +200,11 @@ export const MemeCard = ({meme}) => {
                           </TouchableOpacity>
                     }
 
-                    <AntDesign name="message1" size={24} color="gray" />
+
+                    <TouchableOpacity onPress={() => navigation.navigate("Comments", {memeId: meme.id})}>
+                      <AntDesign name="message1" size={24} color="gray" />
+                    </TouchableOpacity>
+
                   </View>
                   <View>
 

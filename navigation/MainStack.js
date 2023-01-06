@@ -8,9 +8,11 @@ import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../assets/colors";
 import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {setIsOpenUserPersonalDataModal} from "../store/auth/authSlice";
+import {getUser, setIsOpenUserPersonalDataModal} from "../store/auth/authSlice";
 import UserPersonalDataModal from "../components/UserPersonalDataModal";
 import UsersStack from "./UsersStack";
+import {getDatabase, onValue, ref} from "firebase/database";
+import {clearFavouriteMeme, getFavouriteMeme} from "../store/memeOperations/memeOperations";
 
 
 const Tab = createBottomTabNavigator();
@@ -24,6 +26,37 @@ export default function MainStack() {
       dispatch(setIsOpenUserPersonalDataModal(true))
     }
   }, [userData])
+
+
+    //Відслідковує зміну в БД улюблених мемів залогіненого користувача
+    useEffect(() => {
+        const db = getDatabase();
+        const starCountRef = ref(db, `users/${userData.dbId}/favouriteMemes`);
+        const func = onValue(starCountRef, (snapshot) => {
+            const data = snapshot.val();
+            console.log('Змінилися дані у favouriteMemes у FIREBASE', data)
+            if (!data) {
+                dispatch(clearFavouriteMeme([]))
+            } else {
+                dispatch(getFavouriteMeme(JSON.stringify(data)))
+            }
+        });
+
+        return func
+    },[])
+
+
+    useEffect(() => {
+        const db = getDatabase();
+        const starCountRef = ref(db, `users/${userData.dbId}/followMe`);
+        const func = onValue(starCountRef, (snapshot) => {
+            const data = snapshot.val();
+            console.log('Змінилися дані у followMe FIREBASE', data)
+            dispatch(getUser())
+        });
+
+        return func
+    },[])
 
   return (
     <>

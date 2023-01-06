@@ -1,6 +1,8 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import API, {baseParams} from "../../api";
 import apiDB from "../../apiDB";
+import {useToggleFavouriteMemeMutation} from "../queries/dbApi";
+import {getCurrentUser, getUser} from "../auth/authSlice";
 
 const memeOperationsSlice = createSlice({
     name: 'currentMeme',
@@ -118,8 +120,9 @@ export const getUsersThatFollowMe = createAsyncThunk(
                     dispatch(setUsersThatFollowMe(data[0]))
                 })
                 .catch(function (error) {
-                    console.log('Дані юзера у БД  НЕ Змінені',error);
-                });
+                    console.log('Дані юзера у БД  НЕ Змінені',error.name);
+                })
+            ;
         })
 
         dispatch(setIsLoad(false))
@@ -132,10 +135,10 @@ export const getUsersThatFollowMe = createAsyncThunk(
 export const getFavouriteMeme = createAsyncThunk(
     'currentMeme/getFavouriteMeme',
     async (memeArr, {dispatch, getState }) => {
-        console.log('Getting favourite meme')
+        console.log('Getting favourite meme USER at thre moment', getState().auth.user)
         dispatch(clearFavouriteMeme([]))
         dispatch(setIsLoad(true))
-        await memeArr.forEach((item) => {
+        await memeArr && memeArr.forEach((item) => {
             apiDB.get(`memes/${item}.json`)
                 .then(function (response) {
                     dispatch(setFavouriteMeme({...response.data, id: item}))
@@ -145,9 +148,42 @@ export const getFavouriteMeme = createAsyncThunk(
                 });
         })
 
-
-
         dispatch(setIsLoad(false))
+    }
+)
 
+
+//
+export const deleteDataAfterDeletingMeme = createAsyncThunk(
+    'currentMeme/deleteDataAfterDeletingMeme',
+    async (memeId, {dispatch, getState }) => {
+
+        console.log('Afterdeleting визваний', memeId);
+
+        apiDB.get(`users.json`)
+            .then(function (response) {
+                const data = Object.keys(response.data).map(item => response.data[item])
+                console.log('Afterdeleting дата ', data);
+                data.forEach(item => {
+                    if (item.favouriteMemes && item.favouriteMemes.includes(memeId)) {
+                        console.log('Afterdeleting найшов співпадіння');
+
+                        apiDB.put(`users/${item.dbId}/favouriteMemes.json`, JSON.stringify(item.favouriteMemes.filter(item => item !== memeId)))
+                            .then(function (response) {
+                                console.log('Апдейтнулось', response);
+                                if (item.uid === getState().auth.user.uid) {
+                                    dispatch(getUser())
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log('Не Апдейтнулось',error);
+                            });
+                    }
+                })
+
+            })
+            .catch(function (error) {
+                console.log('Зачистка' ,error.name);
+            })
     }
 )
