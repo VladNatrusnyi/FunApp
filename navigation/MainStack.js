@@ -13,6 +13,7 @@ import UserPersonalDataModal from "../components/UserPersonalDataModal";
 import UsersStack from "./UsersStack";
 import {getDatabase, onValue, ref} from "firebase/database";
 import {clearFavouriteMeme, getFavouriteMeme} from "../store/memeOperations/memeOperations";
+import Chat from "../screens/Chat";
 
 
 const Tab = createBottomTabNavigator();
@@ -22,6 +23,7 @@ export default function MainStack() {
   const userData = useSelector(state => state.auth.user)
 
   useEffect(()=> {
+      console.log('userData', userData)
     if (!userData.displayName) {
       dispatch(setIsOpenUserPersonalDataModal(true))
     }
@@ -77,6 +79,12 @@ export default function MainStack() {
                 <Ionicons name='person' size={25}  color={focused ? COLORS.orange : 'gray' }/>
               );
             }
+            // else if (route.name === 'Chat') {
+            // return (
+            // <Ionicons name='person' size={25}  color={focused ? COLORS.orange : 'gray' }/>
+            // );
+            // }
+
           },
           tabBarInactiveTintColor: 'gray',
           tabBarActiveTintColor: COLORS.orange,
@@ -95,6 +103,10 @@ export default function MainStack() {
           name="My Profile"
           component={MyProfileStack}
         />
+          {/*<Tab.Screen*/}
+          {/*    name="Chat"*/}
+          {/*    component={Chat}*/}
+          {/*/>*/}
       </Tab.Navigator>
     </>
   );

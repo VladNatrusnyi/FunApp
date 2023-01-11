@@ -1,6 +1,6 @@
 import {useNavigation} from "@react-navigation/native";
 import React, {useLayoutEffect, useMemo} from "react";
-import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {COLORS} from "../../assets/colors";
 import colors from "../../colors";
 import {
@@ -19,12 +19,6 @@ export const UserProfile = ({route}) => {
 
   const navigation = useNavigation();
 
-   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => <Text style={{ color: COLORS.orange, fontSize: 20, fontWeight: "bold"}}>{userData.displayName}</Text>,
-    });
-  }, [navigation]);
-
   const { userData } = route.params
 
   const { user, isLoading } = useGetCurrentUserQuery(userData.uid, {
@@ -33,6 +27,14 @@ export const UserProfile = ({route}) => {
       user: data?.user
     })
   })
+
+  const headName = useMemo(() => user ? user.displayName : '',[user])
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <Text style={{ color: COLORS.orange, fontSize: 20, fontWeight: "bold"}}>{headName}</Text>,
+    });
+  }, [navigation, user]);
 
   const uid = useMemo(() => user && user.uid, [user])
 
@@ -52,28 +54,30 @@ export const UserProfile = ({route}) => {
 
     if (someUserMemes) {
       return (
-        <View style={styles.row}>
-          {
-            someUserMemes.map(item => {
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  activeOpacity={0.5}
-                  style={styles.box}
-                  onPress={() => navigation.navigate("User profile item", {memeData: item})}
-                >
-                  <Image
-                    style={{width: '100%', height: '100%'}}
-                    source={{
-                      uri: item.url.url,
-                    }}
-                    resizeMode='contain'
-                  />
-                </TouchableOpacity>
-              )
-            })
-          }
-        </View>
+          <ScrollView>
+            <View style={styles.row}>
+              {
+                someUserMemes.map(item => {
+                  return (
+                      <TouchableOpacity
+                          key={item.id}
+                          activeOpacity={0.5}
+                          style={styles.box}
+                          onPress={() => navigation.navigate("User profile item", {memeData: item})}
+                      >
+                        <Image
+                            style={{width: '100%', height: '100%'}}
+                            source={{
+                              uri: item.url.url,
+                            }}
+                            resizeMode='contain'
+                        />
+                      </TouchableOpacity>
+                  )
+                })
+              }
+            </View>
+          </ScrollView>
       )
     }
 

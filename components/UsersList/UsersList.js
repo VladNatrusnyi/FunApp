@@ -1,23 +1,65 @@
-import {Button, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {
+    Button,
+    FlatList,
+    Image,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import SubscribeBtn from "../ui/SubscribeBtn";
 import {COLORS} from "../../assets/colors";
 import MyButton from "../ui/MyButton";
 import {SubscribeInfoBlock} from "../Subscribe/SubscribeInfoBlock";
 import {SubscribeBtnLogic} from "../Subscribe/SubscribeBtnLogic";
-import React from "react";
+import React, {useMemo, useState} from "react";
 import {useSelector} from "react-redux";
 
-export const UsersList = ({users}) => {
+export const UsersList = ({users, onRefreshUsers}) => {
 
     const navigation = useNavigation();
     const loggedUserId = useSelector(state => state.auth.user.uid)
 
+    const [searchName, setSearchName] = useState('')
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const usersArray = useMemo(() => {
+        if (users) {
+            if (searchName) {
+                return users.filter(item => item.displayName.toUpperCase().includes(searchName.toUpperCase()))
+            } else {
+                return users
+            }
+        }
+    }, [searchName, users])
+
+    const onRefresh = () => {
+        if (onRefreshUsers) {
+            onRefreshUsers()
+        }
+    }
+
     return (
         <View>
+            <TextInput
+                style={styles.input}
+                placeholder="Введіть ім'я користувача"
+                autoCapitalize="none"
+                keyboardType="default"
+                value={searchName}
+                onChangeText={(text) => setSearchName(text)}
+            />
             <FlatList
                 keyExtractor={item => item.uid}
-                data={users}
+                data={usersArray}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         key={item.id}
@@ -62,6 +104,17 @@ export const UsersList = ({users}) => {
 
 
 const styles = StyleSheet.create({
+    input: {
+        backgroundColor: "#F6F7FB",
+        height: 58,
+        marginVertical: 20,
+        marginHorizontal: 20,
+        fontSize: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: COLORS.orange,
+        padding: 12,
+    },
     userItem: {
         marginHorizontal: 20,
         height: 80,

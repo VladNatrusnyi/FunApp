@@ -1,7 +1,11 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/dist/query/react";
 import {clearCreatedMeme, clearMemeData, setIsOpenModal, setIsPublished} from "../create-meme/createMemeSlice";
 import {getUser, setAuthUser} from "../auth/authSlice";
-import {deleteDataAfterDeletingMeme, getFavouriteMeme} from "../memeOperations/memeOperations";
+import {
+  deleteCommentAfterDeletingMeme,
+  deleteDataAfterDeletingMeme,
+  getFavouriteMeme, setAllMemeLoad
+} from "../memeOperations/memeOperations";
 
 const baseURL = `https://funapp-caaf5-default-rtdb.firebaseio.com/`
 
@@ -19,6 +23,23 @@ export const dbApi = createApi({
 
   endpoints: builder => ({
 //MEMES ENDPOINTS===========================================
+    getAllMemes: builder.query({
+      query: (arg) => ({
+        url: `memes.json`
+      }),
+      transformResponse: response => ({
+        allMemes: Object.keys(response).map(item => {
+          return {
+            id: item,
+            ...response[item]
+          }
+        })
+      }),
+      async onCacheEntryAdded(_,{dispatch, getState}) {
+        // dispatch(setAllMemeLoad(false))
+      }
+    }),
+
     getMyMemes: builder.query({
       query: (myId) => ({
         url: `memes.json?orderBy="creatorId"&equalTo=${JSON.stringify(myId)}`
@@ -29,7 +50,7 @@ export const dbApi = createApi({
             id: item,
             ...response[item]
           }
-        })
+        }).sort((a, b) => new Date(b.date) - new Date(a.date))
       }),
       providesTags: [{type: 'dbData', id: 'myMemes'}, {type: 'dbData', id: 'memeDelete'}]
     }),
@@ -44,7 +65,7 @@ export const dbApi = createApi({
             id: item,
             ...response[item]
           }
-        })
+        }).sort((a, b) => new Date(b.date) - new Date(a.date))
       }),
       providesTags: ['dbData']
     }),
@@ -141,6 +162,7 @@ export const dbApi = createApi({
           }
       ) {
         await dispatch(deleteDataAfterDeletingMeme(arg))
+        await dispatch(deleteCommentAfterDeletingMeme(arg))
       },
       invalidatesTags: [{type: 'dbData', id: 'memeDelete'}],
     }),
@@ -206,11 +228,29 @@ export const dbApi = createApi({
       invalidatesTags: (result, error, body) => [{type: 'dbData', id: `Comments`}],
     }),
 
+    toggleLikesComment: builder.mutation({
+      query: ({body, id}) => ({
+        url: `comments/${id}/likes.json`,
+        method: 'PUT',
+        body
+      }),
+      invalidatesTags: (result, error, {id}) => [{type: 'dbData', id: `Comments`}],
+    }),
+
+    deleteComment: builder.mutation({
+      query: commentId => ({
+        url: `comments/${commentId}.json`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: [{type: 'dbData', id: `Comments`}],
+    }),
+
   })
 })
 
 
 export const {
+  useGetAllMemesQuery,
   useGetMyMemesQuery,
   useGetMemesForCurrentUserQuery,
   useGetUsersQuery,
@@ -228,5 +268,7 @@ export const {
   useToggleFollowMeMutation,
   useToggleFavouriteMemeMutation,
   usePublishCommentMutation,
+  useToggleLikesCommentMutation,
+  useDeleteCommentMutation
 } = dbApi
 

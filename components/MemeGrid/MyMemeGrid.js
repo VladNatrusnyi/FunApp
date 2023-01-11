@@ -2,7 +2,7 @@ import {useNavigation} from "@react-navigation/native";
 import {useSelector} from "react-redux";
 import {useGetMyMemesQuery} from "../../store/queries/dbApi";
 import Preloader from "../ui/Preloader";
-import {Text} from "react-native";
+import {ScrollView, Text} from "react-native";
 import {MemeGrid} from "./MemeGrid";
 
 
@@ -32,7 +32,9 @@ export const MyMemeGrid = () => {
 
     if (myMemes) {
         return (
-            <MemeGrid memeArr={myMemes} type={'user'}/>
+            <ScrollView>
+                <MemeGrid memeArr={myMemes} type={'me'}/>
+            </ScrollView>
         )
     }
 

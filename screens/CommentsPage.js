@@ -48,7 +48,7 @@ export const CommentsPage = ({route}) => {
     <View style={styles.inner}>
 
         {
-            commentsForCurrentMeme &&
+            commentsForCurrentMeme && commentsForCurrentMeme.length ?
             <FlatList
                 style={{padding: 10}}
                 data={commentsForCurrentMeme}
@@ -58,6 +58,8 @@ export const CommentsPage = ({route}) => {
                     )
                 }}
             />
+                :
+            <Text style={{marginTop: 20, textAlign:'center', fontSize: 20}}>Ще немає коментарів</Text>
         }
 
         <View style={styles.inputBlock}>

@@ -14,7 +14,8 @@ import {getFavouriteMeme} from "../store/memeOperations/memeOperations";
 
 export default function RootNavigator() {
   const dispatch = useDispatch();
-  const {user, isLoading} = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.user);
+  const isLoading = useSelector((state) => state.auth.isLoading);
 
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function RootNavigator() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{color: COLORS.orange, fontSize: 34, fontWeight: "bold"}}>Fun App</Text>
-        <ActivityIndicator size='large' color={COLORS.orange}/>
+        {/*<ActivityIndicator size='large' color={COLORS.orange}/>*/}
       </View>
     );
   }

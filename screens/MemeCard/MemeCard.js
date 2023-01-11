@@ -15,11 +15,15 @@ import Preloader from "../../components/ui/Preloader";
 import {clearUsersWhoLiked, getUsersWhoLiked, setUsersWhoLiked} from "../../store/memeOperations/memeOperations";
 import {useNavigation} from "@react-navigation/native";
 import {getUser} from "../../store/auth/authSlice";
+import apiDB from "../../apiDB";
 
 
 export const MemeCard = ({meme}) => {
   const dispatch = useDispatch()
   const navigation = useNavigation();
+
+  const [usersWhoLiked, setUsersWhoLiked] = useState([])
+
 
   const { memeData } = useGetCurrentMemeQuery(meme.id, {
     skip: !meme.id,
@@ -30,13 +34,43 @@ export const MemeCard = ({meme}) => {
 
   useEffect(() => {
     if (memeData && memeData.likes) {
-      dispatch(getUsersWhoLiked(memeData.likes))
+      getUsersLiked(memeData.likes)
+      // setUsersWhoLiked(getUsersLiked(memeData.likes))
     } else {
       dispatch(clearUsersWhoLiked([]))
     }
   }, [memeData])
 
-  const usersWhoLiked = useSelector(state => state.currentMeme.usersWhoLiked)
+
+  const getUsersLiked = async (usersArr) => {
+
+    setUsersWhoLiked([])
+
+    await usersArr.forEach((item) => {
+      apiDB.get(`users.json?orderBy="uid"&equalTo=${JSON.stringify(item)}`)
+          .then(function (response) {
+            const data = Object.keys(response.data).map(item => response.data[item])
+            console.log('LikesIn DB', data)
+
+            setUsersWhoLiked(state => [...state, data[0]])
+
+          })
+          .catch(function (error) {
+            console.log('Дані юзера у БД  НЕ Змінені',error);
+          });
+    })
+  }
+
+
+
+  // const usersWhoLiked = useSelector(state => state.currentMeme.usersWhoLiked)
+
+  useEffect(() => {
+    if (usersWhoLiked) {
+      console.log('usersWhoLiked2', usersWhoLiked)
+    }
+  },[usersWhoLiked])
+
 
   const likedUsersText = useMemo(() => {
     if (usersWhoLiked && usersWhoLiked.length) {

@@ -4,7 +4,7 @@ import { auth } from "../../config/firebase";
 import {useState} from "react";
 import {useDispatch} from "react-redux";
 import {setAuthIsLoading} from "../../store/auth/authSlice";
-const backImage = require("../../assets/backImage.png");
+const backImage = require("../../assets/minion.jpeg");
 
 export default function Login({ navigation }) {
 

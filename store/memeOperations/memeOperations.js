@@ -11,7 +11,8 @@ const memeOperationsSlice = createSlice({
         usersThatFollow: [],
         usersThatFollowMe: [],
         favouriteMeme: [],
-        isLoad: false
+        isLoad: false,
+
     },
     reducers: {
         setUsersWhoLiked(state, action) {
@@ -66,16 +67,21 @@ export const {
 
 export default memeOperationsSlice.reducer
 
+
 export const getUsersWhoLiked = createAsyncThunk(
     'currentMeme/getUsersWhoLiked',
     async (usersArr, {dispatch, getState }) => {
         dispatch(clearUsersWhoLiked([]))
         dispatch(setIsLoad(true))
+
+        let result = []
             await usersArr.forEach((item) => {
             apiDB.get(`users.json?orderBy="uid"&equalTo=${JSON.stringify(item)}`)
                 .then(function (response) {
                     const data = Object.keys(response.data).map(item => response.data[item])
+                    console.log('LikesIn DB', data)
                     dispatch(setUsersWhoLiked(data[0]))
+                    result.push(data[0])
                 })
                 .catch(function (error) {
                     console.log('Дані юзера у БД  НЕ Змінені',error);
@@ -83,6 +89,8 @@ export const getUsersWhoLiked = createAsyncThunk(
         })
 
         dispatch(setIsLoad(false))
+
+        return result
 
     }
 )
@@ -158,19 +166,14 @@ export const deleteDataAfterDeletingMeme = createAsyncThunk(
     'currentMeme/deleteDataAfterDeletingMeme',
     async (memeId, {dispatch, getState }) => {
 
-        console.log('Afterdeleting визваний', memeId);
-
         apiDB.get(`users.json`)
             .then(function (response) {
                 const data = Object.keys(response.data).map(item => response.data[item])
-                console.log('Afterdeleting дата ', data);
                 data.forEach(item => {
                     if (item.favouriteMemes && item.favouriteMemes.includes(memeId)) {
-                        console.log('Afterdeleting найшов співпадіння');
 
                         apiDB.put(`users/${item.dbId}/favouriteMemes.json`, JSON.stringify(item.favouriteMemes.filter(item => item !== memeId)))
                             .then(function (response) {
-                                console.log('Апдейтнулось', response);
                                 if (item.uid === getState().auth.user.uid) {
                                     dispatch(getUser())
                                 }
@@ -185,5 +188,29 @@ export const deleteDataAfterDeletingMeme = createAsyncThunk(
             .catch(function (error) {
                 console.log('Зачистка' ,error.name);
             })
+    }
+)
+
+
+export const deleteCommentAfterDeletingMeme = createAsyncThunk(
+    'currentMeme/deleteCommentAfterDeletingMeme',
+    async (memeId, {dispatch, getState }) => {
+        apiDB.get(`comments.json?orderBy="memeId"&equalTo=${JSON.stringify(memeId)}`)
+            .then(function (response) {
+                if (response.data && Object.keys(response.data).length) {
+                    Object.keys(response.data).forEach(item => {
+                        apiDB.delete(`comments/${item}.json`)
+                            .then(function (response) {
+                                console.log('Видалено комент',response.data);
+                            })
+                            .catch(function (error) {
+                                console.log('Не Апдейтнулось',error);
+                            });
+                    })
+                }
+            })
+            .catch(function (error) {
+                console.log('Не Апдейтнулось',error);
+            });
     }
 )

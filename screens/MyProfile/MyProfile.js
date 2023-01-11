@@ -39,15 +39,6 @@ const MyProfile = () => {
           <CustomMenu />
         </TouchableOpacity>
 
-        // <TouchableOpacity
-        //   style={{
-        //     marginRight: 10
-        //   }}
-        //   onPress={onSignOut}
-        // >
-        //
-        //   <AntDesign name="logout" size={24} color={colors.gray} style={{marginRight: 10}}/>
-        // </TouchableOpacity>
       )
     });
   }, [navigation]);

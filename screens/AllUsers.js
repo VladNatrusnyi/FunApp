@@ -24,21 +24,25 @@ export function AllUsers () {
   const currentUserId = useSelector(state => state.auth.user.uid)
   // const usersLoaded = useSelector(state => state.users.usersLoaded)
 
-  const { users, isLoading, isError  } = useGetUsersQuery(undefined, {
+  const { users, isLoading, isError, refetch  } = useGetUsersQuery(undefined, {
     selectFromResult: ({data}) => ({
       users: data?.users.filter(user => user.uid !== currentUserId && user.uid)
     })
   })
 
+  const onRefreshUsers = () => {
+    refetch()
+  }
+
   return (
     <View>
-      <View style={{alignItems: "center", marginVertical: 20}}>
-        <Text style={{fontSize: 24, fontWeight: "bold", color: COLORS.orange}} >Користувачі</Text>
-      </View>
+      {/*<View style={{alignItems: "center", marginVertical: 20}}>*/}
+      {/*  <Text style={{fontSize: 24, fontWeight: "bold", color: COLORS.orange}} >Користувачі</Text>*/}
+      {/*</View>*/}
       {
         isLoading
           ? <Preloader />
-          : <UsersList users={users} />
+          : <UsersList users={users} onRefreshUsers={onRefreshUsers} />
       }
     </View>
   )

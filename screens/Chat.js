@@ -25,28 +25,28 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const navigation = useNavigation();
 
-  const onSignOut = () => {
-    signOut(auth).catch(error => console.log('Error logging out: ', error));
-  };
+  // const onSignOut = () => {
+  //   signOut(auth).catch(error => console.log('Error logging out: ', error));
+  // };
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          style={{
-            marginRight: 10
-          }}
-          onPress={onSignOut}
-        >
-          <AntDesign name="logout" size={24} color={colors.gray} style={{marginRight: 10}}/>
-        </TouchableOpacity>
-      )
+      // headerRight: () => (
+      //   <TouchableOpacity
+      //     style={{
+      //       marginRight: 10
+      //     }}
+      //     onPress={onSignOut}
+      //   >
+      //     <AntDesign name="logout" size={24} color={colors.gray} style={{marginRight: 10}}/>
+      //   </TouchableOpacity>
+      // )
     });
   }, [navigation]);
 
   useLayoutEffect(() => {
 //Роюимо посилпння на колекцію
-    const collectionRef = collection(database, 'chats');
+    const collectionRef = collection(database, 'vlad@gmail.com-oleg@gmail.com');
     const q = query(collectionRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, querySnapshot => {
@@ -78,11 +78,6 @@ export default function Chat() {
   }, []);
 
   return (
-    // <>
-    //   {messages.map(message => (
-    //     <Text key={message._id}>{message.text}</Text>
-    //   ))}
-    // </>
     <GiftedChat
       messages={messages}
       showAvatarForEveryMessage={false}
@@ -97,7 +92,7 @@ export default function Chat() {
       }}
       user={{
         _id: auth?.currentUser?.email,
-        avatar: 'https://i.pravatar.cc/300'
+        avatar: auth?.currentUser?.photoURL
       }}
     />
   );

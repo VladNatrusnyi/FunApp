@@ -42,15 +42,18 @@ const authSlice = createSlice({
 export const getUser = createAsyncThunk(
     'auth/getUser',
     (_, {dispatch, getState}) => {
-        apiDB.get(`users.json?orderBy="uid"&equalTo=${JSON.stringify(getState().auth.user.uid)}`)
-            .then(function (response) {
-                const data = Object.keys(response.data).map(item => response.data[item])
-                console.log('Users DATA2', data);
-                dispatch(getCurrentUser(data[0]))
-            })
-            .catch(function (error) {
-                console.log('Дані юзера у БД  НЕ Змінені',error);
-            });
+        if (getState().auth.user.displayName) {
+            apiDB.get(`users.json?orderBy="uid"&equalTo=${JSON.stringify(getState().auth.user.uid)}`)
+                .then(function (response) {
+                    const data = Object.keys(response.data).map(item => response.data[item])
+                    // console.log('Users DATA2', data);
+                    console.log('Data for detCurrentUser1', data[0])
+                    dispatch(getCurrentUser(data[0]))
+                })
+                .catch(function (error) {
+                    console.log('Дані юзера у БД  НЕ Змінені',error);
+                });
+        }
     }
 )
 
@@ -65,6 +68,7 @@ export const setAuthUser = createAsyncThunk(
           .then(function (response) {
             const data = Object.keys(response.data).map(item => response.data[item])
             console.log('Users DATA1', data);
+              console.log('Data for detCurrentUser2', data[0])
             dispatch(getCurrentUser(data[0]))
           })
           .catch(function (error) {
@@ -77,6 +81,7 @@ export const setAuthUser = createAsyncThunk(
           email: user.email,
           photoURL: user.photoURL ? user.photoURL : '',
         }
+          console.log('Data for detCurrentUser3', data)
         dispatch(getCurrentUser(data))
       }
 
@@ -89,6 +94,7 @@ export const setAuthUser = createAsyncThunk(
       });
     } else {
       dispatch(getCurrentUser(null))
+        console.log('Data for detCurrentUser4', null)
       dispatch(setAuthIsLoading(false))
     }
   }
@@ -144,6 +150,7 @@ export const updateUserInDB = createAsyncThunk(
         console.log('Дані юзера у БД Змінені', response);
         apiDB.get(`users/${currentUser.dbId}.json`)
           .then(function (response) {
+              console.log('Data for detCurrentUser6', response.data)
             dispatch(getCurrentUser(response.data))
           })
           .catch(function (error) {
@@ -174,6 +181,7 @@ export const addUserInDB = createAsyncThunk(
             console.log('dbId Додано до БД', response.data);
             apiDB.get(`users/${response.data.dbId}.json`)
               .then(function (response) {
+                  console.log('Data for detCurrentUser7', response.data)
                 dispatch(getCurrentUser(response.data))
               })
               .catch(function (error) {

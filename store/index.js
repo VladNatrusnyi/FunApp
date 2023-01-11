@@ -27,7 +27,10 @@ const rootReducer = (state, action) => {
 export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(dbApi.middleware, imgFlipApi.middleware,)
+    getDefaultMiddleware({
+      immutableCheck: false,
+      serializableCheck: false,
+    }).concat(dbApi.middleware, imgFlipApi.middleware,)
 })
 
 setupListeners(store.dispatch)

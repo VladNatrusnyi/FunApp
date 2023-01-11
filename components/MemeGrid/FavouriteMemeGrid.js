@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {useGetMyMemesQuery} from "../../store/queries/dbApi";
 import Preloader from "../ui/Preloader";
 import {MemeGrid} from "./MemeGrid";
-import {Text} from "react-native";
+import {ScrollView, Text} from "react-native";
 import {useEffect, useMemo} from "react";
 import {clearFavouriteMeme, getFavouriteMeme} from "../../store/memeOperations/memeOperations";
 import {getDatabase, onValue, ref} from "firebase/database";
@@ -33,7 +33,9 @@ export const FavouriteMemeGrid = () => {
 
     if (favouriteMeme.length) {
         return (
-            <MemeGrid memeArr={favouriteMeme} type={'me'}/>
+            <ScrollView>
+                <MemeGrid memeArr={favouriteMeme} type={'me'}/>
+            </ScrollView>
         )
     }
 

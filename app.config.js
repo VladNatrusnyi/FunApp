@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
- export  default {
+export  default {
   "expo": {
     "name": "ChatApp",
     "slug": "ChatApp",
