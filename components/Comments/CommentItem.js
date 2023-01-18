@@ -1,6 +1,6 @@
 import {Alert, Image, Text, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
 import {COLORS} from "../../assets/colors";
-import {AntDesign, SimpleLineIcons} from "@expo/vector-icons";
+import {AntDesign} from "@expo/vector-icons";
 import React, {useMemo, useState} from "react";
 import dateformat from "dateformat";
 import {

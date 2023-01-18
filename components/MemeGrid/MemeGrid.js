@@ -14,7 +14,6 @@ export const MemeGrid = ({memeArr, type}) => {
                             key={item.date}
                             activeOpacity={0.5}
                             style={styles.box}
-                            // All Users
                             // onPress={() => navigation.navigate(type ==='me' ? {"Meme item"} : "User profile item", {memeData: item})}
                             onPress={() => navigation.navigate(type ==='me' ? "Meme item" : "User profile item", {memeData: item})}
                         >

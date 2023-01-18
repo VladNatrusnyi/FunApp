@@ -1,12 +1,9 @@
 import {useNavigation} from "@react-navigation/native";
 import {useDispatch, useSelector} from "react-redux";
-import {useGetMyMemesQuery} from "../../store/queries/dbApi";
-import Preloader from "../ui/Preloader";
 import {MemeGrid} from "./MemeGrid";
 import {ScrollView, Text} from "react-native";
-import {useEffect, useMemo} from "react";
-import {clearFavouriteMeme, getFavouriteMeme} from "../../store/memeOperations/memeOperations";
-import {getDatabase, onValue, ref} from "firebase/database";
+import {useEffect} from "react";
+import { getFavouriteMeme } from "../../store/memeOperations/memeOperations";
 
 export const FavouriteMemeGrid = () => {
     const navigation = useNavigation();
